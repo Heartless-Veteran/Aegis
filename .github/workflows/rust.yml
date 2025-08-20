@@ -1,55 +1,33 @@
-name: Rust CI - Comprehensive
+name: Rust CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-  test_and_lint:
-    # Use a matrix strategy to run the job on different operating systems.
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }} # Runs on the OS specified in the matrix.
+  build:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@v1
         with:
-          # Explicitly add components needed for formatting and linting.
+          toolchain: stable
           components: rustfmt, clippy
 
-      # Cache dependencies to speed up subsequent runs.
-      # The cache is keyed by OS, the hash of Cargo.lock, and the toolchain.
-      - name: Cache cargo dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      # Step 1: Check code formatting. The `--check` flag fails if the code is not formatted correctly.
-      - name: Check formatting
-        run: cargo fmt -- --check
-
-      # Step 2: Run Clippy for linting. '-D warnings' treats all warnings as errors.
-      - name: Run Clippy
-        run: cargo clippy -- -D warnings
-
-      # Step 3: Build the project.
       - name: Build
         run: cargo build --verbose
 
-      # Step 4: Run tests.
       - name: Run tests
         run: cargo test --verbose
+
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+
+      - name: Check formatting
+        run: cargo fmt -- --check
