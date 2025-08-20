@@ -1,6 +1,5 @@
-//! Test utilities and common fixtures for the Aegis compiler test suite
+//! Test utilities for the Aegis compiler test suite
 
-use aegis_compiler::{Scribe, Token, Span};
 use std::time::{Duration, Instant};
 
 /// Test fixture for common Aegis code samples
@@ -96,31 +95,4 @@ impl PerformanceTimer {
     pub fn elapsed_ms(&self) -> u128 {
         self.elapsed().as_millis()
     }
-}
-
-/// Helper function to tokenize input and collect all tokens
-pub fn tokenize_all(input: &str) -> Vec<Token> {
-    let mut scribe = Scribe::new(input);
-    let mut tokens = Vec::new();
-    
-    loop {
-        let token = scribe.next_token();
-        let is_eof = matches!(token, Token::Eof(_));
-        tokens.push(token);
-        if is_eof {
-            break;
-        }
-    }
-    
-    tokens
-}
-
-/// Helper function to count specific token types
-pub fn count_token_type(tokens: &[Token], target_type: fn(&Token) -> bool) -> usize {
-    tokens.iter().filter(|token| target_type(token)).count()
-}
-
-/// Helper to create a span for testing
-pub fn test_span(start: usize, end: usize) -> Span {
-    Span { start, end }
 }
