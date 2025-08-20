@@ -1,6 +1,6 @@
 //! Comprehensive lexer (Scribe) tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, token::{Token, Span}};
+use aegis_compiler::{Scribe, Token, Span};
 use crate::test_utils::{TestFixtures, tokenize_all, test_span};
 
 #[cfg(test)]
