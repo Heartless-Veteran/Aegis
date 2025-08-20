@@ -1,6 +1,6 @@
 //! Semantic analysis (Guardian) tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, architect::Architect, guardian::Guardian};
+use aegis_compiler::{Scribe, Architect, Guardian};
 use crate::test_utils::TestFixtures;
 
 #[cfg(test)]
