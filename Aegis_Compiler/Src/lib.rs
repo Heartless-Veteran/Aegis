@@ -1,50 +1,53 @@
 //! Aegis Programming Language Compiler
-//! 
-//! This crate provides the complete compiler infrastructure for the Aegis
-//! programming language, including lexical analysis, parsing, semantic analysis,
-//! and code generation.
-//! 
-//! ## Architecture
-//! 
-//! The compiler is organized into several key components:
-//! 
-//! - **Scribe (Lexer)**: Converts source code into tokens
-//! - **Architect (Parser)**: Builds Abstract Syntax Trees from tokens  
-//! - **Guardian (Semantic Analyzer)**: Performs type checking and validation
-//! - **Engine (Code Generator)**: Generates target code (Kotlin/Android)
-//! 
-//! ## Usage
-//! 
-//! ```rust
-//! use aegis_compiler::{Scribe, Architect, Guardian};
-//! 
-//! let source = r#"
-//!     app MyApp:
-//!         let's track counter = 0
-//!         show:
-//!             text "Count: {counter}"
-//! "#;
-//! 
-//! // Lexical analysis
-//! let scribe = Scribe::new(source);
-//! 
-//! // Parsing
-//! let mut architect = Architect::new(scribe);
-//! let program = architect.parse_program();
-//! 
-//! // Semantic analysis
-//! let mut guardian = Guardian::new();
-//! guardian.check_program(&program);
-//! ```
 
 pub mod token;
-pub mod architect;
-pub mod guardian;
-pub mod engine;
+pub mod ast;
 pub mod error;
 
+// Include the Scribe from mod.rs
+include!("mod.rs");
+
+// Stub modules for components that need to be implemented
+pub mod architect {
+    use crate::{Scribe, token::Token, error::ParseError, ast::Program};
+    
+    pub struct Architect {
+        pub errors: Vec<ParseError>,
+    }
+    
+    impl Architect {
+        pub fn new(_scribe: Scribe) -> Self {
+            Self { errors: Vec::new() }
+        }
+        
+        pub fn parse_program(&mut self) -> Program {
+            Program {
+                definitions: Vec::new(),
+                span: crate::token::Span { start: 0, end: 0 },
+            }
+        }
+    }
+}
+
+pub mod guardian {
+    use crate::{error::SemanticError, ast::Program};
+    
+    pub struct Guardian {
+        pub errors: Vec<SemanticError>,
+    }
+    
+    impl Guardian {
+        pub fn new() -> Self {
+            Self { errors: Vec::new() }
+        }
+        
+        pub fn check_program(&mut self, _program: &Program) {
+            // Stub implementation
+        }
+    }
+}
+
 // Re-export main types for convenience
-pub use crate::Scribe;
 pub use architect::Architect;
 pub use guardian::Guardian;
 pub use token::{Token, Span};
