@@ -1,6 +1,6 @@
 //! Integration tests for the complete Aegis compiler pipeline
 
-use aegis_compiler::{Scribe, architect::Architect, guardian::Guardian};
+use aegis_compiler::{Scribe, Architect, Guardian};
 use crate::test_utils::{TestFixtures, PerformanceTimer};
 
 #[cfg(test)]
@@ -37,7 +37,7 @@ mod integration_tests {
     }
 
     struct CompilationResult {
-        program: aegis_compiler::architect::ast::Program,
+        program: aegis_compiler::ast::Program,
         parse_errors: Vec<aegis_compiler::error::ParseError>,
         semantic_errors: Vec<aegis_compiler::error::SemanticError>,
         lexing_time: u128,
