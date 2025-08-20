@@ -1,0 +1,18 @@
+# An async function to simulate a network request.
+# The compiler translates this to a Kotlin `suspend` function.
+async let's fetch_username(id: number) -> string:
+    await sleep(1000) # `sleep` is a built-in async function
+    return "Manny"
+
+app AsyncApp:
+    let's track status_text = "Idle"
+
+    show:
+        column:
+            text status_text style { font_size: 20 }
+            button "Fetch User" when_clicked:
+                # The compiler wraps this block in a Coroutine (`lifecycleScope.launch`)
+                # because it contains an `await` call.
+                status_text = "Loading..."
+                let's user = await fetch_username(1)
+                status_text = "Welcome, {user}!"

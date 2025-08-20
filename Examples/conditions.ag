@@ -1,0 +1,21 @@
+# A contract defines the shape of our data.
+contract User:
+    id: number
+    name: string
+    score: number
+
+# A function with typed parameters and a return value.
+# The Guardian validates this entire signature.
+let's calculate_bonus(user: User) -> number:
+    if user.score > 1000:
+        return 500
+    else:
+        return 100
+
+# Using the contract and function
+app FunctionDemo:
+    let's current_user: User = { id: 101, name: "Manny", score: 1500 }
+    let's bonus = calculate_bonus(current_user)
+
+    show:
+        text "{current_user.name}'s bonus is: {bonus}"

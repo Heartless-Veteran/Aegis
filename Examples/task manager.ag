@@ -1,0 +1,54 @@
+# --- Data Model for a Task ---
+contract Task:
+    id: number
+    title: string
+    is_done: boolean
+
+# --- Application Definition ---
+app TaskManager:
+    # --- Reactive Application State ---
+    let's track next_id = 3
+    let's track tasks: List<Task> = [
+        {id: 1, title: "Design the Aegis language", is_done: true},
+        {id: 2, title: "Build the Aegis compiler", is_done: false},
+    ]
+    let's track input_text = ""
+
+    # --- UI Definition ---
+    show:
+        column:
+            text "Aegis Tasks" style { font_size: 28, padding: 16 }
+            
+            # This `for` loop is compiled into a high-performance RecyclerView
+            for task in tasks:
+                row style { padding_h: 16, padding_v: 12 } when_clicked:
+                    # Mutating state here triggers a reactive UI update
+                    task.is_done = not task.is_done
+
+                text task.title style {
+                    font_size: 18,
+                    weight: 1,
+                    # Style is dynamic, based on the task's state
+                    text_decoration: if task.is_done: "line-through" else: "none",
+                    text_color: if task.is_done: "#888888" else: "#000000"
+                }
+
+                button "Remove" when_clicked:
+                    let's index = tasks.findIndex(it.id == task.id)
+                    if index >= 0:
+                        tasks.remove(index)
+            
+            # Input controls for adding new tasks
+            row style { padding: 16, background_color: "#EEEEEE" }:
+                input "Add a new task..." style { weight: 1 } on_change:
+                    input_text = it
+                
+                button "Add" when_clicked:
+                    if input_text.length() > 0:
+                        let's new_task: Task = {
+                            id: next_id, 
+                            title: input_text, 
+                            is_done: false
+                        }
+                        tasks.add(new_task)
+                        next_id = next_id + 1

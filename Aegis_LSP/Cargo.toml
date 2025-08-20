@@ -1,0 +1,23 @@
+[package]
+name = "aegis-lsp"
+version = "0.1.0"
+edition = "2021"
+authors = ["The Aegis Project Contributors"]
+description = "Language Server Protocol (LSP) implementation for the Aegis language."
+
+[dependencies]
+# This line links our LSP to our compiler.
+aegis-compiler = { path = "../aegis-compiler" }
+
+# For the Language Server Protocol framework.
+tower-lsp = "0.20"
+
+# The asynchronous runtime required by tower-lsp.
+tokio = { version = "1.0", features = ["full"] }
+
+# For thread-safe access to our document store.
+dashmap = "5.5"
+
+# For logging and diagnostics.
+tracing = "0.1"
+tracing-subscriber = "0.3"
