@@ -1,6 +1,6 @@
 //! Parser (Architect) tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, architect::{Architect, ast::*}};
+use aegis_compiler::{Scribe, Architect, ast::*};
 use crate::test_utils::TestFixtures;
 
 #[cfg(test)]
