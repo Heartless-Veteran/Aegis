@@ -44,7 +44,7 @@ pub mod engine;
 pub mod error;
 
 // Re-export main types for convenience
-pub use crate::mod::Scribe;
+pub use crate::Scribe;
 pub use architect::Architect;
 pub use guardian::Guardian;
 pub use token::{Token, Span};
