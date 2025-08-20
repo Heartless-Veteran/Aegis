@@ -1,6 +1,6 @@
 //! Test utilities and common fixtures for the Aegis compiler test suite
 
-use aegis_compiler::{Scribe, token::{Token, Span}};
+use aegis_compiler::{Scribe, Token, Span};
 use std::time::{Duration, Instant};
 
 /// Test fixture for common Aegis code samples
