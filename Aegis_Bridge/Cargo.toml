@@ -1,0 +1,26 @@
+[package]
+name = "aegis-bridge"
+version = "0.1.0"
+edition = "2021"
+authors = ["The Aegis Project Contributors"]
+description = "Native JNI bridge for Aegis language interoperability."
+
+# This is the most critical section for the bridge.
+# It tells Rust to build a C-style dynamic library (.so file on Android)
+# that the Java Native Interface (JNI) can load and use.
+[lib]
+crate-type = ["cdylib"]
+
+# These are the external Rust crates our bridge needs to function.
+[dependencies]
+# For interacting with the Java Native Interface.
+jni = "0.21"
+
+# For embedding the V8 JavaScript engine.
+deno_core = "0.288.0"
+
+# An asynchronous runtime required by deno_core.
+tokio = { version = "1", features = ["full"] }
+
+# For serializing data (e.g., to JSON) to pass between Kotlin and Rust.
+serde_json = "1.0"

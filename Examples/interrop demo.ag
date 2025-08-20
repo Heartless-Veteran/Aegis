@@ -1,0 +1,16 @@
+app InteropDemo:
+    let's user = {
+        "name": "Manny",
+        "tags": ["alpha", "beta", "gamma"]
+    }
+
+    # Use JavaScript to perform a string manipulation.
+    # The `{user}` map is serialized to a JS object.
+    let's welcome_message = ask_javascript "
+        const userObj = {user};
+        const tagString = userObj.tags.join(', ').toUpperCase();
+        return `Welcome, ${userObj.name}! Your tags are: ${tagString}`;
+    "
+
+    show:
+        text welcome_message
