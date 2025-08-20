@@ -1,7 +1,7 @@
 //! Language feature tests for the Aegis compiler
 //! Tests specific language constructs and their behavior
 
-use aegis_compiler::{Scribe, architect::Architect, guardian::Guardian};
+use aegis_compiler::{Scribe, Architect, Guardian};
 use crate::test_utils::{TestFixtures, tokenize_all};
 
 #[cfg(test)]
