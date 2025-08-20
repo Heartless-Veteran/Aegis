@@ -1,0 +1,18 @@
+# This is the manifest for the entire Aegis workspace.
+[workspace]
+
+# It lists all the Rust crates that are part of this project.
+members = [
+    "aegis-compiler",
+    "aegis-lsp",
+    "aegis-bridge",
+]
+
+# Using "resolver = 2" enables the newer, more efficient
+# feature resolver from Cargo.
+resolver = "2"
+
+# In a larger project, we could define shared dependencies here
+# to ensure all crates use the same version of a library.
+# [workspace.dependencies]
+# serde = "1.0"
