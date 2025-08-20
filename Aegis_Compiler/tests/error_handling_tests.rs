@@ -1,6 +1,6 @@
 //! Error handling and recovery tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, architect::Architect, guardian::Guardian};
+use aegis_compiler::{Scribe, Architect, Guardian};
 
 #[cfg(test)]
 mod error_handling_tests {
