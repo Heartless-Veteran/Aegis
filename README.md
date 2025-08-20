@@ -9,9 +9,8 @@
 
 **Aegis is a universal programming language for joyful, safe, and powerful creation.**
 
-[![Build Status](https://img.shields.io/badge/build-pending-yellow.svg)](https://github.com/aegis-lang/aegis/actions)
+[![Build Status](https://img.shields.io/badge/build-pending-yellow.svg)](https://github.com/Heartless-Veteran/Aegis/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Discord](https://img.shields.io/discord/88888888?label=discord&logo=discord&color=7289DA)](https://discord.gg/aegis-lang)
 
 ---
 
@@ -21,10 +20,10 @@ Aegis is a new programming language designed from the ground up to be **declarat
 
 This repository contains the foundational work for Aegis, including:
 * A working compiler pipeline that translates a subset of Aegis to a native Android project.
-* **[📖 The Official Language Guide](./docs/guide.md)**
-* **[📜 The v1.0 Grammar Specification](./specification/aegis-v1.0-grammar.md)**
-* **[🗺️ The Project Roadmap](./ROADMAP.md)**
+* **[📖 The Official Language Guide](./Docs/guide.md)**
+* **[📜 The v1.0 Grammar Specification](./Specification/aegis-v1.0-grammar.md)**
+* **[🗺️ The Project Roadmap](./Roadmap.md)**
 
 ### Contributing
 
-We welcome contributions of all kinds! Please read our **[Contribution Guide](./CONTRIBUTING.md)** to get started.
+We welcome contributions of all kinds! Please read our **[Contribution Guide](./Contributing.md)** to get started.
