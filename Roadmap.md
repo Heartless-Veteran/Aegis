@@ -3,7 +3,7 @@
 Welcome to the official roadmap for the Aegis programming language and toolchain. This document outlines our major milestones, tracks our progress, and communicates our priorities for future development. It is a living document that will evolve with the project and community feedback.
 
 ---
-## ## ✅ v0.2: The Foundation (Completed)
+## ✅ v0.2: The Foundation (Completed)
 
 This milestone represents the successful creation of a complete, end-to-end prototype of the Aegis compiler and its core features. All major architectural components are in place.
 
