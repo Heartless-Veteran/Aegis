@@ -19,7 +19,7 @@ This milestone represents the successful creation of a complete, end-to-end prot
 - [x] **Tooling:** A basic language server (LSP) and a functional CLI (`aegis new`, `aegis build`).
 
 ---
-## ## 🚀 v0.5: The Hardening (Current Focus)
+## 🚀 v0.5: The Hardening (Current Focus)
 
 With the foundation in place, this milestone is focused on improving the stability, utility, and developer experience of the existing feature set.
 
