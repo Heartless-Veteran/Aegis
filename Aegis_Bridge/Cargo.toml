@@ -10,6 +10,7 @@ description = "Native JNI bridge for Aegis language interoperability."
 # that the Java Native Interface (JNI) can load and use.
 [lib]
 crate-type = ["cdylib"]
+path = "Src/lib.rs"
 
 # These are the external Rust crates our bridge needs to function.
 [dependencies]

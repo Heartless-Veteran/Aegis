@@ -16,3 +16,8 @@ resolver = "2"
 # to ensure all crates use the same version of a library.
 # [workspace.dependencies]
 # serde = "1.0"
+
+# Optimization settings for release builds
+[profile.release]
+opt-level = 3
+lto = true

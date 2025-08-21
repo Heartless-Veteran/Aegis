@@ -5,9 +5,13 @@ edition = "2021"
 authors = ["The Aegis Project Contributors"]
 description = "Language Server Protocol (LSP) implementation for the Aegis language."
 
+[[bin]]
+name = "aegis-lsp"
+path = "Src/main.rs"
+
 [dependencies]
 # This line links our LSP to our compiler.
-aegis-compiler = { path = "../aegis-compiler" }
+aegis-compiler = { path = "../Aegis_Compiler" }
 
 # For the Language Server Protocol framework.
 tower-lsp = "0.20"
