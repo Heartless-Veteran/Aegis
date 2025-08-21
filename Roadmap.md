@@ -43,7 +43,7 @@ This milestone represents our goal for a stable, feature-rich version of Aegis r
 
 - [ ] **Language Feature Complete:**
     - [ ] Implement all 19 core container types.
-    - [ ] Implement full exhaustiveness checking for `when` expressions.
+    - [ ] Implement full exhaustive checking for `when` expressions.
 - [ ] **Android Backend Complete:**
     - [ ] Move from a prototype to a production-ready code generator.
     - [ ] Support for all major Android lifecycle events in the `change` block.
