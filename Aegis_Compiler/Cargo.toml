@@ -19,17 +19,8 @@ path = "Src/lib.rs"
 criterion = "0.5"  # For benchmarking
 proptest = "1.0"   # For property-based testing
 
-[[bench]]
-name = "compiler_benchmarks"
-harness = false
-
 [features]
 default = []
 # Feature flags for different compiler components
 debug-mode = []
 performance-profiling = []
-
-# Optimization settings for release builds
-[profile.release]
-opt-level = 3
-lto = true
