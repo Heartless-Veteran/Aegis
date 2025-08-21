@@ -56,7 +56,7 @@ This milestone represents our goal for a stable, feature-rich version of Aegis r
     - [ ] Complete API reference for the standard library.
 
 ---
-## ## 🌌 Future & Vision (Post-1.0)
+## 🌌 Future & Vision (Post-1.0)
 
 These are the long-term ambitions for the Aegis project, solidifying its place as a truly universal language.
 
