@@ -3,9 +3,9 @@
 
 # It lists all the Rust crates that are part of this project.
 members = [
-    "aegis-compiler",
-    "aegis-lsp",
-    "aegis-bridge",
+    "Aegis_Compiler",
+    "Aegis_LSP", 
+    "Aegis_Bridge",
 ]
 
 # Using "resolver = 2" enables the newer, more efficient

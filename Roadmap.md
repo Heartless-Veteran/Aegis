@@ -1,30 +1,74 @@
-# Aegis Project Roadmap (rev. 8)
+# 🗺️ Aegis Project Roadmap
 
-This document outlines the development plan for the Aegis language. The check-marks (`[X]`) indicate features that have a working prototype in the `v0.1.0-alpha` release.
+Welcome to the official roadmap for the Aegis programming language and toolchain. This document outlines our major milestones, tracks our progress, and communicates our priorities for future development. It is a living document that will evolve with the project and community feedback.
 
-## Version 0.1: The Scribe & Architect (Lexing & Parsing) - ✅ COMPLETE
-* [X] Finalize the complete Aegis grammar specification in EBNF.
-* [X] Implement the Scribe (lexer).
-* [X] Implement the Architect (parser) with Pratt parsing.
+---
+## ## ✅ v0.2: The Foundation (Completed)
 
-## Version 0.2: The Guardian (Semantic Analysis) - ✅ COMPLETE
-* [X] Implement the scoped Symbol Table.
-* [X] Implement name resolution.
-* [X] Implement the foundational `contract` system.
-* [X] Implement initial type checking for expressions.
-* [X] Implement analysis of typed function definitions.
+This milestone represents the successful creation of a complete, end-to-end prototype of the Aegis compiler and its core features. All major architectural components are in place.
 
-## Version 0.3: The Engine (Initial Codegen) - ✅ COMPLETE (Prototype)
-* [X] Implement the full pipeline for the Android target.
-* [X] Implement high-performance list rendering (`for` loops compiling to `RecyclerView`).
-* [X] Implement the JavaScript Bridge for interoperability.
+- [x] **Core Compiler:** A fully functional pipeline (Scribe, Architect, Guardian, Engine) written in Rust.
+- [x] **Language Core:** Support for variables (`let's`), functions, `if/else`, `for` loops, and `when` expressions.
+- [x] **Type System:** A foundational system with `contract`s, type inference, and `async/await` validation.
+- [x] **Project Nexus (UI Framework):** A complete prototype for the Android target, including:
+    - [x] A declarative component model (`column`, `text`, `button`, etc.).
+    - [x] A compile-time reactivity model (`let's track`).
+    - [x] A type-safe styling system.
+    - [x] High-performance list rendering (`for` loops -> `RecyclerView`).
+- [x] **The Bridge:** A working JavaScript interoperability bridge using a native JNI library.
+- [x] **Tooling:** A basic language server (LSP) and a functional CLI (`aegis new`, `aegis build`).
 
-## Version 0.4: The Forge (Tooling) - ✅ COMPLETE (Prototype)
-* [X] Implement the `aegis` CLI with analysis commands.
-* [X] Implement workflow commands (`aegis new`, `aegis build`).
-* [ ] Implement the test runner (`aegis test`).
+---
+## ## 🚀 v0.5: The Hardening (Current Focus)
 
-## Next Up: The Grand Unification & Hardening
-* [ ] Implement function calls in the Engine.
-* [ ] Implement the `async/await` feature in the Engine.
-* [ ] Begin work on the Language Server Protocol (LSP) for IDE integration.
+With the foundation in place, this milestone is focused on improving the stability, utility, and developer experience of the existing feature set.
+
+- [ ] **Implement the Test Runner (`aegis test`)**
+    - [ ] Design the syntax for writing tests in Aegis.
+    - [ ] Build the test runner into the Forge CLI.
+- [ ] **Expand the Standard Library**
+    - [ ] Add more essential methods to `List` and `Map`.
+    - [ ] Implement new core containers like `Tuple` and `Set`.
+- [ ] **Harden the Guardian (Semantic Analyzer)**
+    - [ ] Implement full type checking for `contract` initializers (`let's user: User = {...}`).
+    - [ ] Improve the precision and helpfulness of type error messages.
+- [ ] **Enhance the Language Server (LSP)**
+    - [ ] Implement "Go to Definition".
+    - [ ] Implement general autocompletion for keywords and in-scope variables.
+
+---
+## ## 🌟 v1.0: First Public Release (Upcoming)
+
+This milestone represents our goal for a stable, feature-rich version of Aegis ready for a wider audience.
+
+- [ ] **Language Feature Complete:**
+    - [ ] Implement all 19 core container types.
+    - [ ] Implement full exhaustiveness checking for `when` expressions.
+- [ ] **Android Backend Complete:**
+    - [ ] Move from a prototype to a production-ready code generator.
+    - [ ] Support for all major Android lifecycle events in the `change` block.
+- [ ] **Tooling Complete:**
+    - [ ] A robust and feature-rich test runner.
+    - [ ] A basic package manager (`aegis add <package>`).
+    - [ ] A stable and performant language server.
+- [ ] **Documentation Complete:**
+    - [ ] A full, book-like guide with comprehensive examples.
+    - [ ] Complete API reference for the standard library.
+
+---
+## ## 🌌 Future & Vision (Post-1.0)
+
+These are the long-term ambitions for the Aegis project, solidifying its place as a truly universal language.
+
+- [ ] **Project Nexus Expansion:**
+    - [ ] Target iOS via a Swift/SwiftUI code generator.
+    - [ ] Target the Web via a WebAssembly/WASM-DOM code generator.
+    - [ ] Explore Desktop support (e.g., via Compose Multiplatform).
+- [ ] **The Bridge Expansion:**
+    - [ ] Implement the Python bridge for data science and scripting.
+    - [ ] Implement the Rust/C++ bridge for high-performance native libraries.
+- [ ] **Performance & Optimization:**
+    - [ ] A dedicated compiler pass for optimizing AIL (Aegis Intermediate Language).
+    - [ ] Advanced rendering strategies for the UI backend.
+- [ ] **Aegis Synapse:**
+    - [ ] An integrated, beginner-friendly machine learning library.

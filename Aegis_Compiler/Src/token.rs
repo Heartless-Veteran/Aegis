@@ -132,7 +132,7 @@ impl Token {
     pub fn literal_string(&self) -> String {
         match self {
             Token::Identifier(s, _) => s.clone(),
-            _ => "".to-string(),
+            _ => "".to_string(),
         }
     }
 }
