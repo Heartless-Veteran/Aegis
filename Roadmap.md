@@ -37,7 +37,7 @@ With the foundation in place, this milestone is focused on improving the stabili
     - [ ] Implement general autocompletion for keywords and in-scope variables.
 
 ---
-## ## 🌟 v1.0: First Public Release (Upcoming)
+## 🌟 v1.0: First Public Release (Upcoming)
 
 This milestone represents our goal for a stable, feature-rich version of Aegis ready for a wider audience.
 
