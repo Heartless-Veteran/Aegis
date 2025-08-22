@@ -3,9 +3,9 @@
 
 # It lists all the Rust crates that are part of this project.
 members = [
-    "aegis-compiler",
-    "aegis-lsp",
-    "aegis-bridge",
+    "Aegis_Compiler",
+    "Aegis_LSP", 
+    "Aegis_Bridge",
 ]
 
 # Using "resolver = 2" enables the newer, more efficient
@@ -16,3 +16,8 @@ resolver = "2"
 # to ensure all crates use the same version of a library.
 # [workspace.dependencies]
 # serde = "1.0"
+
+# Optimization settings for release builds
+[profile.release]
+opt-level = 3
+lto = true
