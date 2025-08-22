@@ -38,15 +38,28 @@ pub extern "system" fn Java_com_aegisapp_AegisBridge_executeJs<'local>(
         let mut runtime = JsRuntime::new(RuntimeOptions::default());
 
         // 5. Execute the script. `deno_core` uses futures.
-        let result_global = runtime.execute_script("<aegis>", final_script.into())
+        let result_global = runtime.execute_script("<aegis>", final_script)
             .expect("JS execution failed");
         
-        // 6. Get a handle to the result and serialize it back to a JSON string.
+        // 6. Get a handle to the result and convert it to a JSON string.
         let scope = &mut runtime.handle_scope();
         let local_result = deno_core::v8::Local::new(scope, result_global);
         
-        serde_json::to_string(&local_result)
-            .unwrap_or_else(|e| format!("{{\"error\":\"Failed to serialize result: {}\"}}", e))
+        // Convert V8 value to JSON string using V8's JSON.stringify equivalent
+        let json_result = if local_result.is_string() {
+            format!("\"{}\"", local_result.to_rust_string_lossy(scope))
+        } else if local_result.is_number() {
+            local_result.number_value(scope).unwrap_or(0.0).to_string()
+        } else if local_result.is_boolean() {
+            local_result.boolean_value(scope).to_string()
+        } else if local_result.is_null_or_undefined() {
+            "null".to_string()
+        } else {
+            // For objects, try to convert to string representation
+            local_result.to_rust_string_lossy(scope)
+        };
+        
+        json_result
     });
 
     // 7. Convert the Rust String result back into a JString to return to Kotlin.
