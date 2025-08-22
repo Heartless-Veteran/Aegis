@@ -3,7 +3,7 @@
 Welcome to the official roadmap for the Aegis programming language and toolchain. This document outlines our major milestones, tracks our progress, and communicates our priorities for future development. It is a living document that will evolve with the project and community feedback.
 
 ---
-## ## ✅ v0.2: The Foundation (Completed)
+## ✅ v0.2: The Foundation (Completed)
 
 This milestone represents the successful creation of a complete, end-to-end prototype of the Aegis compiler and its core features. All major architectural components are in place.
 
@@ -19,7 +19,7 @@ This milestone represents the successful creation of a complete, end-to-end prot
 - [x] **Tooling:** A basic language server (LSP) and a functional CLI (`aegis new`, `aegis build`).
 
 ---
-## ## 🚀 v0.5: The Hardening (Current Focus)
+## 🚀 v0.5: The Hardening (Current Focus)
 
 With the foundation in place, this milestone is focused on improving the stability, utility, and developer experience of the existing feature set.
 
@@ -37,7 +37,7 @@ With the foundation in place, this milestone is focused on improving the stabili
     - [ ] Implement general autocompletion for keywords and in-scope variables.
 
 ---
-## ## 🌟 v1.0: First Public Release (Upcoming)
+## 🌟 v1.0: First Public Release (Upcoming)
 
 This milestone represents our goal for a stable, feature-rich version of Aegis ready for a wider audience.
 
@@ -56,7 +56,7 @@ This milestone represents our goal for a stable, feature-rich version of Aegis r
     - [ ] Complete API reference for the standard library.
 
 ---
-## ## 🌌 Future & Vision (Post-1.0)
+## 🌌 Future & Vision (Post-1.0)
 
 These are the long-term ambitions for the Aegis project, solidifying its place as a truly universal language.
 
