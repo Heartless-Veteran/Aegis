@@ -34,7 +34,7 @@ impl LanguageServer for Backend {
         Ok(InitializeResult {
             server_info: Some(ServerInfo {
                 name: "Aegis Language Server".to_string(),
-                version: Some("0.1.0-alpha".to_string()),
+                version: Some("0.2.0-alpha".to_string()),
             }),
             capabilities: ServerCapabilities {
                 // We support full document synchronization.

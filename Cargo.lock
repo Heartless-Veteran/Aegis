@@ -25,7 +25,7 @@ checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
 name = "aegis-bridge"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "deno_core",
  "jni",
@@ -35,7 +35,7 @@ dependencies = [
 
 [[package]]
 name = "aegis-compiler"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "criterion",
  "proptest",
@@ -43,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "aegis-lsp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aegis-compiler",
  "dashmap",
