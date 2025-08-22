@@ -45,7 +45,46 @@ pub extern "system" fn Java_com_aegisapp_AegisBridge_executeJs<'local>(
         let scope = &mut runtime.handle_scope();
         let local_result = deno_core::v8::Local::new(scope, result_global);
         
-        // Convert V8 value to JSON string using V8's JSON.stringify equivalent
+        // Use V8's JSON.stringify to serialize the result reliably
+        let json_global = {
+            let context = scope.get_current_context();
+            let global = context.global(scope);
+            let json_obj = global
+                .get(scope, deno_core::v8::String::new(scope, "JSON").unwrap().into())
+                .and_then(|v| v.to_object(scope));
+            if let Some(json_obj) = json_obj {
+                let stringify_key = deno_core::v8::String::new(scope, "stringify").unwrap();
+                let stringify_func = json_obj.get(scope, stringify_key.into());
+                if let Some(stringify_func) = stringify_func {
+                    if stringify_func.is_function() {
+                        let func = deno_core::v8::Local::<deno_core::v8::Function>::try_from(stringify_func).unwrap();
+                        let args = [local_result];
+                        let json_value = func.call(scope, json_obj.into(), &args);
+                        if let Some(json_value) = json_value {
+                            Some(json_value)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        };
+
+        let json_result = if let Some(json_value) = json_global {
+            if json_value.is_undefined() || json_value.is_null() {
+                "null".to_string()
+            } else {
+                json_value.to_rust_string_lossy(scope)
+            }
+        } else {
+            "{\"error\":\"Failed to serialize result with JSON.stringify\"}".to_string()
+        };
         let json_result = if local_result.is_string() {
             format!("\"{}\"", local_result.to_rust_string_lossy(scope))
         } else if local_result.is_number() {
