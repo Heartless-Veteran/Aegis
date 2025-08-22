@@ -6,11 +6,19 @@ use tracing::info;
 
 // Import all the necessary components from our compiler.
 use aegis_compiler::{
-    architect::{ast::Expression, Architect},
-    guardian::{types::Type, Guardian},
-    scribe::Scribe,
+    Architect, Guardian, Scribe,
     token::Span,
 };
+
+// Simple type system for LSP autocompletion
+#[derive(Debug, Clone)]
+pub enum Type {
+    String,
+    Number,
+    Boolean,
+    List(Box<Type>),
+    Map(Box<Type>, Box<Type>),
+}
 
 // This struct holds the state of our language server.
 struct Backend {
@@ -117,7 +125,7 @@ impl Backend {
     }
 
     // Helper to create a diagnostic message
-    fn create_diagnostic(&self, span: Span, message: String, source: &str) -> Diagnostic {
+    fn create_diagnostic(&self, _span: Span, message: String, source: &str) -> Diagnostic {
         // A real implementation would convert byte-offset Span to line/character Range
         Diagnostic {
             range: Range::default(),
@@ -129,7 +137,7 @@ impl Backend {
     }
     
     // Helper to generate completion items
-    fn get_suggestions_for_type(&self, ty: &Type) -> Vec<CompletionItem> {
+    fn get_suggestions_for_type(&self, _ty: &Type) -> Vec<CompletionItem> {
         // ... (as implemented before)
         vec![]
     }
