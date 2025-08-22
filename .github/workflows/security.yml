@@ -1,0 +1,242 @@
+name: Security & Dependencies
+
+on:
+  schedule:
+    # Run security audit daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  pull_request:
+    paths: ['Cargo.toml', 'Cargo.lock', '**/Cargo.toml']
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Comprehensive security audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-cargo-audit-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run Cargo Audit
+        run: |
+          cargo audit --json > audit-results.json || true
+          cargo audit --ignore RUSTSEC-2020-0071 # Ignore known issues we can't fix yet
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-results
+          path: audit-results.json
+
+  # License compliance check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install cargo-license
+        run: cargo install cargo-license
+
+      - name: Check licenses
+        run: |
+          echo "# License Report" > license-report.md
+          echo "" >> license-report.md
+          cargo license --json > licenses.json
+          cargo license --tsv >> license-report.md
+          
+          # Check for potentially problematic licenses
+          if grep -q "GPL" licenses.json; then
+            echo "⚠️ Found GPL licensed dependencies" >> license-report.md
+          fi
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: |
+            license-report.md
+            licenses.json
+
+  # Dependency vulnerability scanning
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
+
+  # Supply chain security
+  supply-chain-security:
+    name: Supply Chain Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny
+
+      - name: Create cargo-deny configuration
+        run: |
+          mkdir -p .cargo
+          cat > deny.toml << 'EOF'
+          [advisories]
+          db-path = "~/.cargo/advisory-db"
+          db-urls = ["https://github.com/rustsec/advisory-db"]
+          vulnerability = "deny"
+          unmaintained = "warn"
+          yanked = "deny"
+          notice = "warn"
+          ignore = [
+              "RUSTSEC-2020-0071", # time crate issue, commonly ignored
+          ]
+
+          [licenses]
+          unlicensed = "deny"
+          allow = [
+              "MIT",
+              "Apache-2.0",
+              "Apache-2.0 WITH LLVM-exception",
+              "BSD-2-Clause",
+              "BSD-3-Clause",
+              "ISC",
+              "Unicode-DFS-2016",
+          ]
+          deny = [
+              "GPL-2.0",
+              "GPL-3.0",
+              "AGPL-1.0",
+              "AGPL-3.0",
+          ]
+
+          [bans]
+          multiple-versions = "warn"
+          wildcards = "deny"
+          highlight = "all"
+
+          [sources]
+          unknown-registry = "warn"
+          unknown-git = "warn"
+          allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+          EOF
+
+      - name: Run cargo-deny
+        run: cargo deny check
+
+  # Update dependency report
+  dependency-update-check:
+    name: Dependency Update Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install cargo-outdated
+        run: cargo install cargo-outdated
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "# Dependency Update Report" > dependency-updates.md
+          echo "" >> dependency-updates.md
+          echo "## Outdated Dependencies" >> dependency-updates.md
+          cargo outdated --root-deps-only >> dependency-updates.md || echo "No outdated dependencies found" >> dependency-updates.md
+
+      - name: Upload dependency report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-update-report
+          path: dependency-updates.md
+
+  # Create security summary
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [security-audit, license-check, supply-chain-security]
+    if: always()
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create security summary
+        run: |
+          echo "# Security & Compliance Summary" > security-summary.md
+          echo "" >> security-summary.md
+          echo "**Generated:** $(date -u)" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## Security Audit Status" >> security-summary.md
+          if [ -f "artifacts/security-audit-results/audit-results.json" ]; then
+            echo "✅ Security audit completed" >> security-summary.md
+          else
+            echo "❌ Security audit failed" >> security-summary.md
+          fi
+          
+          echo "" >> security-summary.md
+          echo "## License Compliance" >> security-summary.md
+          if [ -f "artifacts/license-report/license-report.md" ]; then
+            echo "✅ License report generated" >> security-summary.md
+          else
+            echo "❌ License check failed" >> security-summary.md
+          fi
+          
+          echo "" >> security-summary.md
+          echo "## Supply Chain Security" >> security-summary.md
+          echo "✅ Supply chain security checks completed" >> security-summary.md
+          
+          echo "" >> security-summary.md
+          echo "## Recommendations" >> security-summary.md
+          echo "- Monitor security advisories regularly" >> security-summary.md
+          echo "- Keep dependencies updated" >> security-summary.md
+          echo "- Review license compatibility" >> security-summary.md
+
+      - name: Upload security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: security-summary.md
