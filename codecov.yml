@@ -1,0 +1,69 @@
+coverage:
+  status:
+    project:
+      default:
+        # Set project coverage target
+        target: 70%
+        threshold: 5%
+        # Only post status on PRs
+        if_ci_failed: error
+    
+    patch:
+      default:
+        # Patch coverage target
+        target: 60%
+        threshold: 10%
+
+  precision: 2
+  round: down
+  range: "50...90"
+
+flags:
+  compiler:
+    paths:
+      - Aegis_Compiler/
+    carryforward: false
+    
+  lsp:
+    paths:
+      - Aegis_LSP/
+    carryforward: true  # LSP may have intermittent coverage
+    
+  bridge:
+    paths:
+      - Aegis_Bridge/
+    carryforward: true  # Bridge compilation issues
+
+ignore:
+  - "target/"
+  - "*.lock"
+  - "*.toml"
+  - "examples/"
+  - "scripts/"
+  - ".devcontainer/"
+  - ".github/"
+
+comment:
+  layout: "header,diff,flags,tree,footer"
+  behavior: default
+  require_changes: true
+  require_base: false
+  require_head: true
+  
+  after_n_builds: 1
+  
+  # Custom comment for Aegis project
+  header: |
+    ## 📊 Aegis Test Coverage Report
+    
+    **Component Status:**
+    - 🟢 Compiler: Primary focus with comprehensive testing
+    - 🟡 LSP: Basic coverage with ongoing improvements  
+    - 🔴 Bridge: Limited coverage due to compilation issues
+    
+    Coverage changes impact the stability of Aegis components.
+
+  footer: |
+    ---
+    📚 [Coverage Guidelines](https://github.com/Heartless-Veteran/Aegis/blob/main/DEVELOPMENT.md#testing) | 
+    🎯 Target: 70% overall, 80% for compiler core

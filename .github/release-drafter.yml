@@ -1,0 +1,142 @@
+name-template: 'Aegis $RESOLVED_VERSION 🚀'
+tag-template: 'v$RESOLVED_VERSION'
+version-template: '$MAJOR.$MINOR.$PATCH'
+
+categories:
+  - title: '🚀 New Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'lang-feature'
+    
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+      - 'fix'
+      - 'bugfix'
+    
+  - title: '🔧 Compiler Improvements'
+    labels:
+      - 'compiler'
+      - 'lexer'
+      - 'parser' 
+      - 'semantic'
+      - 'codegen'
+    
+  - title: '🔌 Language Server (LSP)'
+    labels:
+      - 'lsp'
+      - 'ide'
+      - 'language-server'
+    
+  - title: '🌉 Bridge & Interop'
+    labels:
+      - 'bridge'
+      - 'interop'
+      - 'javascript'
+    
+  - title: '📚 Documentation'
+    labels:
+      - 'documentation'
+      - 'docs'
+      - 'guide'
+    
+  - title: '🧪 Testing'
+    labels:
+      - 'testing'
+      - 'tests'
+      - 'ci'
+    
+  - title: '⚡ Performance'
+    labels:
+      - 'performance'
+      - 'optimization'
+      - 'benchmark'
+    
+  - title: '🔒 Security'
+    labels:
+      - 'security'
+      - 'vulnerability'
+      - 'audit'
+    
+  - title: '🏗️ Infrastructure & Tooling'  
+    labels:
+      - 'infrastructure'
+      - 'ci-cd'
+      - 'workflow'
+      - 'tooling'
+      - 'devcontainer'
+
+exclude-labels:
+  - 'skip-changelog'
+  - 'duplicate'
+  - 'question'
+  - 'invalid'
+  - 'wontfix'
+
+version-resolver:
+  major:
+    labels:
+      - 'breaking-change'
+      - 'major'
+  minor:
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'lang-feature'
+      - 'minor'
+  patch:
+    labels:
+      - 'bug'
+      - 'fix'
+      - 'bugfix' 
+      - 'patch'
+      - 'documentation'
+  default: patch
+
+template: |
+  ## What's Changed in Aegis $RESOLVED_VERSION
+
+  $CHANGES
+
+  ### 📊 Project Status
+  - **Compiler**: Working with comprehensive test suite (50+ tests)
+  - **Language Server**: Basic functionality with ongoing improvements
+  - **Bridge**: Under active development
+  - **Documentation**: Auto-generated and deployed
+
+  ### 🎯 Current Roadmap Focus
+  We are currently working toward **v0.5: The Hardening** milestone, focusing on:
+  - Enhanced type checking and semantic analysis
+  - Improved language server capabilities  
+  - Expanded standard library
+  - Performance optimizations
+
+  ### 📥 Installation
+
+  #### Quick Install (Linux/macOS)
+  ```bash
+  curl -sSL https://github.com/Heartless-Veteran/Aegis/releases/download/$RESOLVED_VERSION/install.sh | bash
+  ```
+
+  #### Manual Download
+  - **Linux x86_64**: [Download](https://github.com/Heartless-Veteran/Aegis/releases/download/$RESOLVED_VERSION/aegis-linux-x86_64.tar.gz)
+  - **macOS x86_64**: [Download](https://github.com/Heartless-Veteran/Aegis/releases/download/$RESOLVED_VERSION/aegis-macos-x86_64.tar.gz)  
+  - **macOS ARM64**: [Download](https://github.com/Heartless-Veteran/Aegis/releases/download/$RESOLVED_VERSION/aegis-macos-aarch64.tar.gz)
+  - **Windows x86_64**: [Download](https://github.com/Heartless-Veteran/Aegis/releases/download/$RESOLVED_VERSION/aegis-windows-x86_64.zip)
+
+  #### Docker
+  ```bash
+  docker run --rm -v $(pwd):/workspace ghcr.io/heartless-veteran/aegis:$RESOLVED_VERSION
+  ```
+
+  ### 🤝 Contributing
+  
+  Thank you to all contributors who made this release possible! 
+  
+  Want to contribute? Check out:
+  - [Contributing Guidelines](https://github.com/Heartless-Veteran/Aegis/blob/main/Contributing.md)
+  - [Development Setup](https://github.com/Heartless-Veteran/Aegis/blob/main/DEVELOPMENT.md)
+  - [Project Roadmap](https://github.com/Heartless-Veteran/Aegis/blob/main/Roadmap.md)
+
+  **Full Changelog**: https://github.com/Heartless-Veteran/Aegis/compare/$PREVIOUS_TAG...$RESOLVED_VERSION
