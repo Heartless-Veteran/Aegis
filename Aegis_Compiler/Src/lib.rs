@@ -9,7 +9,7 @@ include!("mod.rs");
 
 // Stub modules for components that need to be implemented
 pub mod architect {
-    use crate::{Scribe, token::Token, error::ParseError, ast::Program};
+    use crate::{Scribe, error::ParseError, ast::Program};
     
     pub struct Architect {
         pub errors: Vec<ParseError>,
@@ -51,3 +51,4 @@ pub mod guardian {
 pub use architect::Architect;
 pub use guardian::Guardian;
 pub use token::{Token, Span};
+pub use ast::Expression;

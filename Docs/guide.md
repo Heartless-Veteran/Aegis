@@ -1,11 +1,11 @@
 
 # The Aegis Programming Language
-### The Official Guide (v0.1.0-alpha)
+### The Official Guide (v0.2.0-alpha)
 
 Welcome to Aegis! This guide will walk you through the core principles and features of the Aegis language, from basic syntax to building a complete, reactive Android application.
 
 > **A Note on Versioning**
-> You are reading the guide for Aegis `v0.1.0-alpha`. The language is in its infancy. Many features described here have a working prototype, but some are part of the grand vision and not yet fully implemented. We will mark these "vision features" and "alpha implementations" clearly.
+> You are reading the guide for Aegis `v0.2.0-alpha`. The language has a solid foundation with a complete compiler pipeline and comprehensive test suite. Many core features are implemented and tested, while advanced features are still in development. We will mark "implemented features" and "planned features" clearly.
 
 ---
 ## Part I: Getting Started

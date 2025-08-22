@@ -1,4 +1,4 @@
-use crate::token::{Token, Span};
+// Token and Span are already imported via lib.rs
 
 /// The Scribe (Lexer) turns a string of source code into a stream of tokens.
 pub struct Scribe<'a> {
