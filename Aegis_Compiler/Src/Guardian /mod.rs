@@ -247,25 +247,45 @@ impl Guardian {
         }
     }
 
-    /// Checks a contract definition and registers it as a new type.
-    pub fn check_contract_definition(&mut self, contract: &ContractDefinition) {
-        let mut fields = HashMap::new();
-        
-        // Process each field in the contract
-        for field in &contract.fields {
-            let field_type = self.resolve_type_from_string(&field.type_annotation);
-            fields.insert(field.name.clone(), field_type);
+    /// UPDATED: This function now handles generic parameters in contract definitions.
+    pub fn check_contract_definition(&mut self, contract_def: &ContractDefinition) {
+        // 1. Create a temporary scope for resolving generic types within the contract.
+        let mut contract_scope = SymbolTable::new_enclosed(self.symbol_table.clone());
+        for param in &contract_def.generic_params {
+            // Register each generic parameter as a `Generic` type within this scope.
+            let generic_type = Type::Generic(param.clone());
+            contract_scope.define(param.clone(), generic_type, SymbolKind::Type);
         }
+
+        // 2. Resolve the types of the fields using the temporary scope.
+        let mut resolved_fields = HashMap::new();
+        for field in &contract_def.fields {
+            let field_type = self.resolve_type_identifier(&field.type_ann, &contract_scope);
+            resolved_fields.insert(field.name.clone(), field_type);
+        }
+
+        // 3. Define the contract in the main scope.
+        // The symbol will note that this is a generic type definition.
+        let contract_kind = if contract_def.generic_params.is_empty() {
+            // Regular contract
+            SymbolKind::Contract {
+                fields: resolved_fields,
+            }
+        } else {
+            // Generic contract
+            SymbolKind::GenericContract {
+                params: contract_def.generic_params.clone(),
+                fields: resolved_fields,
+            }
+        };
         
-        // Create the contract type
-        let contract_type = Type::Custom(contract.name.clone());
-        let contract_kind = SymbolKind::Contract { fields };
+        // The "type" here is a placeholder, as it can't be a concrete type until instantiated.
+        let contract_type = Type::Custom(contract_def.name.clone());
         
-        // Define the contract type in the symbol table
-        if !self.symbol_table.define(contract.name.clone(), contract_type, contract_kind) {
+        if !self.symbol_table.define(contract_def.name.clone(), contract_type, contract_kind) {
             self.errors.push(SemanticError::new(
-                format!("Contract '{}' is already declared", contract.name),
-                contract.span.clone(),
+                format!("Contract '{}' is already declared", contract_def.name),
+                contract_def.span.clone(),
                 SemanticErrorType::DuplicateDeclaration,
             ));
         }
@@ -454,6 +474,38 @@ impl Guardian {
                 } else {
                     Type::Custom(type_str.to_string())
                 }
+            }
+        }
+    }
+    
+    /// NEW: Helper function to resolve a `TypeIdentifier` AST node into a `Type`.
+    fn resolve_type_identifier(&mut self, type_ann: &TypeIdentifier, scope: &SymbolTable) -> Type {
+        match type_ann {
+            TypeIdentifier::Simple { name, .. } => {
+                // Look up the type name in the current scope.
+                // This will find primitive types, custom types, and generic params.
+                scope.resolve(name).map_or_else(
+                    || {
+                        // Fallback to built-in types if not found in scope
+                        match name.as_str() {
+                            "number" => Type::Number,
+                            "string" => Type::String,
+                            "boolean" => Type::Boolean,
+                            "nothing" => Type::Nothing,
+                            _ => Type::Custom(name.clone())
+                        }
+                    },
+                    |s| s.ty.clone()
+                )
+            }
+            TypeIdentifier::Generic { name, args, .. } => {
+                // (Future) This is where we would handle instantiating generic
+                // types like `List<T>`. For now, we'll just handle the simple case.
+                if name == "List" && args.len() == 1 {
+                    let inner_type = self.resolve_type_identifier(&args[0], scope);
+                    return Type::List(Box::new(inner_type));
+                }
+                Type::Error
             }
         }
     }
