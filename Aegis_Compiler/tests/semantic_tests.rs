@@ -75,3 +75,20 @@ fn test_semantic_analysis_app() {
     // The stub implementation should handle this gracefully
     assert!(guardian.errors.is_empty());
 }
+
+#[test]
+fn test_semantic_analysis_enum() {
+    let input = r#"enum Status:
+    Active
+    Inactive
+    Pending"#;
+    let scribe = Scribe::new(input);
+    let mut architect = Architect::new(scribe);
+    let program = architect.parse_program();
+    
+    let mut guardian = Guardian::new();
+    guardian.check_program(&program);
+    
+    // The stub implementation should handle this gracefully
+    assert!(guardian.errors.is_empty());
+}
