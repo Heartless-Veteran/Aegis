@@ -243,6 +243,12 @@ pub enum WhenPattern {
     Literal(Literal),
     Identifier(String),
     Else,
+    /// A pattern that matches an enum variant, e.g., `is MyEnum::Variant`.
+    EnumVariant {
+        enum_name: String,
+        variant_name: String,
+        span: Span,
+    },
 }
 
 /// Call expression
