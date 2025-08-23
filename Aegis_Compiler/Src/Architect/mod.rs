@@ -464,4 +464,80 @@ impl<'a> Architect<'a> {
         // For now, just return the left expression (no infix operations)
         None
     }
+    
+    /// Parse an app definition (stub implementation)
+    fn parse_app_definition(&mut self) -> Option<AppDefinition> {
+        let start_span = self.current_token.span();
+        
+        // Consume 'app' token
+        if !matches!(self.current_token, Token::App(_)) {
+            return None;
+        }
+        self.next_token();
+        
+        // Get app name
+        let name = if let Token::Identifier(name, _) = &self.current_token {
+            let app_name = name.clone();
+            self.next_token();
+            app_name
+        } else {
+            self.errors.push(ParseError {
+                message: "Expected app name".to_string(),
+                span: self.current_token.span(),
+            });
+            return None;
+        };
+        
+        // Skip the rest for now (colon and body)
+        while !matches!(self.current_token, Token::Eof(_)) && 
+              !matches!(self.current_token, Token::Let(_)) &&
+              !matches!(self.current_token, Token::Contract(_)) &&
+              !matches!(self.current_token, Token::App(_)) {
+            self.next_token();
+        }
+        
+        Some(AppDefinition {
+            name,
+            body: AppBody::default(),
+            span: start_span,
+        })
+    }
+    
+    /// Parse an enum definition (stub implementation)
+    fn parse_enum_definition(&mut self) -> Option<EnumDefinition> {
+        let start_span = self.current_token.span();
+        
+        // Consume 'enum' token
+        if !matches!(self.current_token, Token::Enum(_)) {
+            return None;
+        }
+        self.next_token();
+        
+        // Get enum name
+        let name = if let Token::Identifier(name, _) = &self.current_token {
+            let enum_name = name.clone();
+            self.next_token();
+            enum_name
+        } else {
+            self.errors.push(ParseError {
+                message: "Expected enum name".to_string(),
+                span: self.current_token.span(),
+            });
+            return None;
+        };
+        
+        // Skip the rest for now
+        while !matches!(self.current_token, Token::Eof(_)) && 
+              !matches!(self.current_token, Token::Let(_)) &&
+              !matches!(self.current_token, Token::Contract(_)) &&
+              !matches!(self.current_token, Token::App(_)) &&
+              !matches!(self.current_token, Token::Enum(_)) {
+            self.next_token();
+        }
+        
+        Some(EnumDefinition {
+            name,
+            variants: Vec::new(),
+            span: start_span,
+        })
 }
