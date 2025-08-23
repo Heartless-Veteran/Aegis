@@ -5,10 +5,7 @@ use tower_lsp::{Client, LanguageServer, LspService, Server};
 use tracing::info;
 
 // Import all the necessary components from our compiler.
-use aegis_compiler::{
-    Architect, Guardian, Scribe,
-    token::Span,
-};
+use aegis_compiler::{token::Span, Architect, Guardian, Scribe};
 
 // Simple type system for LSP autocompletion
 #[derive(Debug, Clone)]
@@ -55,7 +52,9 @@ impl LanguageServer for Backend {
     }
 
     async fn initialized(&self, _: InitializedParams) {
-        self.client.log_message(MessageType::INFO, "Aegis LSP server initialized!").await;
+        self.client
+            .log_message(MessageType::INFO, "Aegis LSP server initialized!")
+            .await;
         info!("Aegis LSP: Server initialized.");
     }
 
@@ -121,7 +120,9 @@ impl Backend {
                 diagnostics.push(self.create_diagnostic(err.span, err.message, "Guardian"));
             }
         }
-        self.client.publish_diagnostics(uri, diagnostics, None).await;
+        self.client
+            .publish_diagnostics(uri, diagnostics, None)
+            .await;
     }
 
     // Helper to create a diagnostic message
@@ -135,7 +136,7 @@ impl Backend {
             ..Default::default()
         }
     }
-    
+
     // Helper to generate completion items
     fn get_suggestions_for_type(&self, _ty: &Type) -> Vec<CompletionItem> {
         // ... (as implemented before)

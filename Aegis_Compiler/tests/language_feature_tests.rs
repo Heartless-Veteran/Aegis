@@ -1,20 +1,21 @@
 //! Language feature tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, Architect, Guardian, Token};
+use aegis_compiler::{Architect, Guardian, Scribe, Token};
 
 #[test]
 fn test_variable_declaration_tokens() {
     let input = "let's x = 42";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 4);
     assert!(matches!(tokens[0], Token::Let(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "x"));
@@ -26,15 +27,16 @@ fn test_variable_declaration_tokens() {
 fn test_tracked_variable_tokens() {
     let input = "let's track counter = 0";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 5);
     assert!(matches!(tokens[0], Token::Let(_)));
     assert!(matches!(tokens[1], Token::Track(_)));
@@ -47,15 +49,16 @@ fn test_tracked_variable_tokens() {
 fn test_function_definition_tokens() {
     let input = "let's add(a: number, b: number) -> number:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     // Should contain let's, add, (, a, :, number, ,, b, :, number, ), ->, number, :
     assert!(tokens.len() >= 10);
     assert!(matches!(tokens[0], Token::Let(_)));
@@ -67,15 +70,16 @@ fn test_function_definition_tokens() {
 fn test_async_function_tokens() {
     let input = "async let's fetch_data():";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert!(tokens.len() >= 5);
     assert!(matches!(tokens[0], Token::Async(_)));
     assert!(matches!(tokens[1], Token::Let(_)));
@@ -88,15 +92,16 @@ fn test_async_function_tokens() {
 fn test_contract_definition_tokens() {
     let input = "contract User:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 3);
     assert!(matches!(tokens[0], Token::Contract(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "User"));
@@ -107,15 +112,16 @@ fn test_contract_definition_tokens() {
 fn test_app_definition_tokens() {
     let input = "app MyApp:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 3);
     assert!(matches!(tokens[0], Token::App(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "MyApp"));
@@ -130,7 +136,7 @@ fn test_expression_tokens() {
         ("!true", vec!["!", "true"]),
         ("-42", vec!["-", "42"]),
     ];
-    
+
     for (input, expected_count) in test_cases {
         let mut scribe = Scribe::new(input);
         let tokens: Vec<Token> = std::iter::from_fn(|| {
@@ -139,9 +145,15 @@ fn test_expression_tokens() {
                 Token::Eof(_) => None,
                 _ => Some(token),
             }
-        }).collect();
-        
-        assert_eq!(tokens.len(), expected_count.len(), "Failed for input: {}", input);
+        })
+        .collect();
+
+        assert_eq!(
+            tokens.len(),
+            expected_count.len(),
+            "Failed for input: {}",
+            input
+        );
     }
 }
 
@@ -149,20 +161,21 @@ fn test_expression_tokens() {
 fn test_control_flow_tokens() {
     let input = "if condition: result else: other";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     // Should contain if, condition, :, result, else, :, other
     assert!(tokens.len() >= 7);
     assert!(matches!(tokens[0], Token::If(_)));
     assert!(matches!(tokens[2], Token::Colon(_)));
-    
+
     // Find else token
     let has_else = tokens.iter().any(|token| matches!(token, Token::Else(_)));
     assert!(has_else);
@@ -172,15 +185,16 @@ fn test_control_flow_tokens() {
 fn test_for_loop_tokens() {
     let input = "for item in items:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 5);
     assert!(matches!(tokens[0], Token::For(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "item"));
@@ -193,15 +207,16 @@ fn test_for_loop_tokens() {
 fn test_when_expression_tokens() {
     let input = "when value is 1:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 5);
     assert!(matches!(tokens[0], Token::When(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "value"));
@@ -214,15 +229,16 @@ fn test_when_expression_tokens() {
 fn test_ui_show_tokens() {
     let input = "show:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 2);
     assert!(matches!(tokens[0], Token::Show(_)));
     assert!(matches!(tokens[1], Token::Colon(_)));
@@ -232,15 +248,16 @@ fn test_ui_show_tokens() {
 fn test_enum_definition_tokens() {
     let input = "enum Status:";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 3);
     assert!(matches!(tokens[0], Token::Enum(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "Status"));
@@ -251,15 +268,16 @@ fn test_enum_definition_tokens() {
 fn test_enum_with_variants_tokens() {
     let input = "enum Result: Success Failed";
     let mut scribe = Scribe::new(input);
-    
+
     let tokens: Vec<Token> = std::iter::from_fn(|| {
         let token = scribe.next_token();
         match token {
             Token::Eof(_) => None,
             _ => Some(token),
         }
-    }).collect();
-    
+    })
+    .collect();
+
     assert_eq!(tokens.len(), 5);
     assert!(matches!(tokens[0], Token::Enum(_)));
     assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "Result"));
@@ -288,14 +306,14 @@ fn test_complete_language_constructs() {
         "false",
         "nothing",
     ];
-    
+
     for construct in constructs {
         let scribe = Scribe::new(construct);
         let mut architect = Architect::new(scribe);
         let program = architect.parse_program();
         let mut guardian = Guardian::new();
         guardian.check_program(&program);
-        
+
         // Should not crash on any language construct
         // Stub implementations should handle all gracefully
         assert!(architect.errors.is_empty());

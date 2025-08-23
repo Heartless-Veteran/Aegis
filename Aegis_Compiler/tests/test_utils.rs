@@ -85,7 +85,9 @@ pub struct PerformanceTimer {
 
 impl PerformanceTimer {
     pub fn new() -> Self {
-        Self { start: Instant::now() }
+        Self {
+            start: Instant::now(),
+        }
     }
 
     pub fn elapsed(&self) -> Duration {

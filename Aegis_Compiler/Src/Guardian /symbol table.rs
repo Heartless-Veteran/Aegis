@@ -11,7 +11,9 @@ pub struct Symbol {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SymbolKind {
-    Variable { is_tracked: bool },
+    Variable {
+        is_tracked: bool,
+    },
     Type,
     Function {
         param_types: Vec<Type>,
@@ -50,7 +52,11 @@ impl SymbolTable {
         if self.store.contains_key(&name) {
             return false;
         }
-        let symbol = Symbol { name: name.clone(), kind, ty };
+        let symbol = Symbol {
+            name: name.clone(),
+            kind,
+            ty,
+        };
         self.store.insert(name, symbol);
         true
     }

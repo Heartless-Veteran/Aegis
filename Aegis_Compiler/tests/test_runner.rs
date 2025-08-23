@@ -109,7 +109,8 @@ impl TestReport {
 
     /// Generate a simple summary
     pub fn generate_summary(&self) -> String {
-        format!("Tests: {} passed, {} failed, {} total ({:.1}% success rate) in {:.2}s",
+        format!(
+            "Tests: {} passed, {} failed, {} total ({:.1}% success rate) in {:.2}s",
             self.total_passed(),
             self.total_failed(),
             self.total_tests(),

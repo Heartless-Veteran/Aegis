@@ -1,6 +1,6 @@
 //! Tests for contract initialization type checking
 
-use aegis_compiler::{Scribe, Architect, Guardian};
+use aegis_compiler::{Architect, Guardian, Scribe};
 
 #[test]
 fn test_simple_contract_initialization() {
@@ -15,12 +15,16 @@ let's user: User = {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // Should pass - correct contract initialization
-    assert!(guardian.errors.is_empty(), "Expected no errors, but got: {:?}", guardian.errors);
+    assert!(
+        guardian.errors.is_empty(),
+        "Expected no errors, but got: {:?}",
+        guardian.errors
+    );
 }
 
 #[test]
@@ -36,12 +40,15 @@ let's user: User = {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // Should fail - missing required field
-    assert!(!guardian.errors.is_empty(), "Expected errors for missing field");
+    assert!(
+        !guardian.errors.is_empty(),
+        "Expected errors for missing field"
+    );
 }
 
 #[test]
@@ -57,12 +64,15 @@ let's user: User = {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // Should fail - wrong field type
-    assert!(!guardian.errors.is_empty(), "Expected errors for wrong field type");
+    assert!(
+        !guardian.errors.is_empty(),
+        "Expected errors for wrong field type"
+    );
 }
 
 #[test]
@@ -79,10 +89,13 @@ let's user: User = {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // Should fail - extra field not in contract
-    assert!(!guardian.errors.is_empty(), "Expected errors for extra field");
+    assert!(
+        !guardian.errors.is_empty(),
+        "Expected errors for extra field"
+    );
 }

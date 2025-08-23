@@ -1,6 +1,6 @@
 //! Semantic analysis tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, Architect, Guardian};
+use aegis_compiler::{Architect, Guardian, Scribe};
 
 #[test]
 fn test_semantic_analysis_simple() {
@@ -8,10 +8,10 @@ fn test_semantic_analysis_simple() {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // The stub implementation should not produce errors
     assert!(guardian.errors.is_empty());
 }
@@ -22,10 +22,10 @@ fn test_semantic_analysis_empty() {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     assert!(guardian.errors.is_empty());
 }
 
@@ -36,10 +36,10 @@ fn test_semantic_analysis_function() {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // The stub implementation should handle this gracefully
     assert!(guardian.errors.is_empty());
 }
@@ -52,10 +52,10 @@ fn test_semantic_analysis_contract() {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // The stub implementation should handle this gracefully
     assert!(guardian.errors.is_empty());
 }
@@ -68,10 +68,10 @@ fn test_semantic_analysis_app() {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // The stub implementation should handle this gracefully
     assert!(guardian.errors.is_empty());
 }
@@ -85,10 +85,10 @@ fn test_semantic_analysis_enum() {
     let scribe = Scribe::new(input);
     let mut architect = Architect::new(scribe);
     let program = architect.parse_program();
-    
+
     let mut guardian = Guardian::new();
     guardian.check_program(&program);
-    
+
     // The stub implementation should handle this gracefully
     assert!(guardian.errors.is_empty());
 }
