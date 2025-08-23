@@ -1,4 +1,4 @@
-use crate::guardian::types::Type;
+use crate::guardian_types::Type;
 use std::collections::HashMap;
 
 /// Represents a declared identifier in the code.

@@ -7,6 +7,16 @@ pub mod error;
 // Include the Scribe from mod.rs
 include!("mod.rs");
 
+// Include the Guardian module properly
+#[path = "Guardian /mod.rs"]
+pub mod guardian_impl;
+
+#[path = "Guardian /types.rs"]
+pub mod guardian_types;
+
+#[path = "Guardian /symbol table.rs"]
+pub mod guardian_symbol_table;
+
 // Stub modules for components that need to be implemented
 pub mod architect {
     use crate::{Scribe, error::ParseError, ast::Program};
@@ -30,21 +40,7 @@ pub mod architect {
 }
 
 pub mod guardian {
-    use crate::{error::SemanticError, ast::Program};
-    
-    pub struct Guardian {
-        pub errors: Vec<SemanticError>,
-    }
-    
-    impl Guardian {
-        pub fn new() -> Self {
-            Self { errors: Vec::new() }
-        }
-        
-        pub fn check_program(&mut self, _program: &Program) {
-            // Stub implementation
-        }
-    }
+    pub use crate::guardian_impl::Guardian;
 }
 
 // Re-export main types for convenience

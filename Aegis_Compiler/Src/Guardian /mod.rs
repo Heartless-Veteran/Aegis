@@ -4,10 +4,10 @@
 //! It checks for type mismatches, undeclared variables, incorrect function calls,
 //! and other semantic errors.
 
-use crate::architect::ast::*;
+use crate::ast::*;
 use crate::error::SemanticError;
-use crate::guardian::symbol_table::{Symbol, SymbolKind, SymbolTable};
-use crate::guardian::types::Type;
+use crate::guardian_symbol_table::{SymbolKind, SymbolTable};
+use crate::guardian_types::Type;
 use std::collections::HashMap;
 
 /// The Guardian walks the AST to find semantic errors and build metadata.
@@ -68,22 +68,105 @@ impl Guardian {
     /// The main entry point for type inference and checking of expressions.
     /// This function recursively determines the type of every expression,
     /// reporting errors for invalid operations.
-    fn infer_expression_type(&mut self, expr: &Expression) -> Type {
-        // This is a placeholder for the large match statement that would handle
-        // every possible expression type (Literals, Infix, Prefix, Calls, etc.).
-        // For example:
+    pub fn infer_expression_type(&mut self, expr: &Expression) -> Type {
         match expr {
             Expression::Literal(Literal::Number(_), _) => Type::Number,
+            Expression::Literal(Literal::String(_), _) => Type::String,
+            Expression::Literal(Literal::Boolean(_), _) => Type::Boolean,
+            Expression::Literal(Literal::Nothing, _) => Type::Nothing,
+            
+            Expression::Identifier(name, _) => {
+                if let Some(symbol) = self.symbol_table.resolve(name) {
+                    symbol.ty
+                } else {
+                    // Error: Undefined identifier
+                    Type::Error
+                }
+            }
+
+            // UPDATED: MemberAccess now also handles enum instantiation.
+            Expression::MemberAccess(member_access) => {
+                if let Expression::Identifier(ident_name, _) = &member_access.object {
+                    // Check if the identifier is a known type.
+                    if let Some(symbol) = self.symbol_table.resolve(ident_name) {
+                        // If the symbol is an enum...
+                        if let SymbolKind::Enum { variants } = &symbol.kind {
+                            // ...and the property is a valid variant of that enum...
+                            if variants.contains(&member_access.property) {
+                                // ...then this is a valid enum instantiation.
+                                return Type::Enum(ident_name.clone());
+                            } else {
+                                // Error: `property` is not a variant of enum `ident_name`.
+                                return Type::Error;
+                            }
+                        }
+                    }
+                }
+                // (Fallback to existing logic for object.property access)
+                Type::Error
+            }
+
+            // UPDATED: `when` expression checking is now more powerful.
+            Expression::When(when_expr) => {
+                let subject_type = self.infer_expression_type(&when_expr.value);
+                let mut case_types = Vec::new();
+
+                for case in &when_expr.cases {
+                    match &case.pattern {
+                        WhenPattern::Literal(literal) => {
+                            let literal_type = self.infer_literal_type(literal);
+                            if literal_type != subject_type {
+                                // Error: Pattern type mismatch.
+                            }
+                        }
+                        // NEW: Check enum variant patterns.
+                        WhenPattern::EnumVariant { enum_name, variant_name, .. } => {
+                            // Check that the pattern's enum type matches the subject's enum type.
+                            if subject_type != Type::Enum(enum_name.clone()) {
+                                // Error: Pattern is for a different enum type.
+                                return Type::Error;
+                            }
+                            // Check that the variant name is valid for this enum.
+                            if let Some(symbol) = self.symbol_table.resolve(enum_name) {
+                                if let SymbolKind::Enum { variants } = &symbol.kind {
+                                    if !variants.contains(variant_name) {
+                                        // Error: Invalid variant name for enum.
+                                        return Type::Error;
+                                    }
+                                }
+                            }
+                        }
+                        WhenPattern::Identifier(_) => {
+                            // For now, assume identifier patterns are valid
+                        }
+                        WhenPattern::Else => {
+                            // Else patterns are always valid
+                        }
+                    }
+                    case_types.push(self.infer_expression_type(&case.body));
+                }
+
+                // Ensure all cases return the same type.
+                if case_types.windows(2).all(|w| w[0] == w[1]) {
+                    case_types.get(0).cloned().unwrap_or(Type::Nothing)
+                } else {
+                    // Error: `when` expression cases must return the same type.
+                    Type::Error
+                }
+            }
+
             Expression::Infix(infix_expr) => {
                 let left_type = self.infer_expression_type(&infix_expr.left);
                 let right_type = self.infer_expression_type(&infix_expr.right);
                 // Check if the operation is valid for the inferred types.
                 if left_type == Type::Number && right_type == Type::Number {
-                    return Type::Number;
+                    Type::Number
+                } else {
+                    // If not, push a SemanticError to the `errors` vector.
+                    Type::Error
                 }
-                // If not, push a SemanticError to the `errors` vector.
-                Type::Error
             }
+            
             // ... cases for all other expression types ...
             _ => Type::Error,
         }
@@ -102,7 +185,7 @@ impl Guardian {
     // fn check_ui_node(&mut self, node: &UiNode) { ... }
 
     /// Validates an enum definition and adds it to the symbol table.
-    fn check_enum_definition(&mut self, enum_def: &EnumDefinition) {
+    pub fn check_enum_definition(&mut self, enum_def: &EnumDefinition) {
         // 1. Define the enum type itself in the current scope.
         let enum_type = Type::Enum(enum_def.name.clone());
         let enum_kind = SymbolKind::Enum {
@@ -111,5 +194,17 @@ impl Guardian {
         self.symbol_table.define(enum_def.name.clone(), enum_type, enum_kind);
 
         // 2. Future: Validate that variant names are unique, etc.
+    }
+
+    /// Helper method to infer the type of a literal value.
+    fn infer_literal_type(&self, literal: &Literal) -> Type {
+        match literal {
+            Literal::Number(_) => Type::Number,
+            Literal::String(_) => Type::String,
+            Literal::Boolean(_) => Type::Boolean,
+            Literal::Nothing => Type::Nothing,
+            Literal::List(_) => Type::Error, // Simplified for now
+            Literal::Map(_) => Type::Error,  // Simplified for now
+        }
     }
 }
