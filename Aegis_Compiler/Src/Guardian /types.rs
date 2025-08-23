@@ -2,6 +2,8 @@
 //! It is used by the Guardian (semantic analyzer) to represent and track the
 //! type of every expression and variable within an Aegis program.
 
+use std::collections::HashMap;
+
 /// The internal representation of types within the Guardian.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
@@ -41,6 +43,10 @@ pub enum Type {
     /// where the type is not known at compile time.
     Dynamic,
     
-    /// A user-defined enum type, identified by its name.
-    Enum(String),
+    /// A user-defined enum type with its variants and their associated types.
+    Enum {
+        name: String,
+        /// The key is the variant name, the value is the list of associated types.
+        variants: HashMap<String, Vec<Type>>,
+    },
 }
