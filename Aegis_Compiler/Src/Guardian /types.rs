@@ -49,4 +49,10 @@ pub enum Type {
         /// The key is the variant name, the value is the list of associated types.
         variants: HashMap<String, Vec<Type>>,
     },
+    
+    /// A function type with parameter types and return type.
+    Function {
+        params: Vec<Type>,
+        return_type: Box<Type>,
+    },
 }

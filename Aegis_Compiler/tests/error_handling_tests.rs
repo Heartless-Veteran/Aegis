@@ -41,9 +41,10 @@ fn test_parser_error_handling() {
     
     let _program = architect.parse_program();
     
-    // The stub implementation doesn't actually parse, so it won't generate errors
-    // In a real implementation, this would test error recovery
-    assert!(architect.errors.is_empty()); // Stub behavior
+    // The real implementation should now detect and report the error
+    // when encountering invalid syntax like '@'
+    println!("Parser errors: {:?}", architect.errors);
+    assert!(!architect.errors.is_empty()); // Real implementation should detect errors
 }
 
 #[test]
