@@ -40,4 +40,7 @@ pub enum Type {
     /// A dynamic type from an external source, like the JavaScript Bridge,
     /// where the type is not known at compile time.
     Dynamic,
+    
+    /// A user-defined enum type, identified by its name.
+    Enum(String),
 }

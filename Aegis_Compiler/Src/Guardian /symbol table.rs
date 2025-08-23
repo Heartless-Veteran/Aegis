@@ -17,6 +17,9 @@ pub enum SymbolKind {
         param_types: Vec<Type>,
         return_type: Box<Type>,
     },
+    Enum {
+        variants: Vec<String>,
+    },
 }
 
 /// A new table is created for each new scope (e.g., function or loop bodies).

@@ -16,6 +16,7 @@ pub enum Definition {
     Contract(ContractDefinition),
     Function(FunctionDefinition),
     Statement(Statement),
+    Enum(EnumDefinition),
 }
 
 /// Statements
@@ -285,5 +286,20 @@ pub struct ListLiteral {
 #[derive(Debug, Clone)]
 pub struct MapLiteral {
     pub pairs: Vec<(Expression, Expression)>,
+    pub span: Span,
+}
+
+/// Enum definition
+#[derive(Debug, Clone)]
+pub struct EnumDefinition {
+    pub name: String,
+    pub variants: Vec<EnumVariant>,
+    pub span: Span,
+}
+
+/// Enum variant
+#[derive(Debug, Clone)]
+pub struct EnumVariant {
+    pub name: String,
     pub span: Span,
 }
