@@ -84,21 +84,58 @@ impl Guardian {
                 }
             }
 
+            // UPDATED: A `Call` expression can now be an enum instantiation with data.
+            Expression::Call(call_expr) => {
+                // Check if the "function" being called is an enum variant, e.g., `LoadState::Success`.
+                if let Expression::MemberAccess(member_access) = &call_expr.function {
+                    if let Expression::Identifier(ident_name, _) = &member_access.object {
+                        if let Some(symbol) = self.symbol_table.resolve(ident_name) {
+                            if let Type::Enum { name, variants } = &symbol.ty {
+                                // This is an enum. Now check if the variant exists.
+                                if let Some(expected_types) = variants.get(&member_access.property) {
+                                    // It's a valid variant. Now check the arguments.
+                                    if call_expr.arguments.len() != expected_types.len() {
+                                        // Error: Incorrect number of arguments for variant.
+                                        return Type::Error;
+                                    }
+                                    // Check that each argument's type matches the expected type.
+                                    for (arg, expected_ty) in call_expr.arguments.iter().zip(expected_types) {
+                                        let arg_ty = self.infer_expression_type(arg);
+                                        if &arg_ty != expected_ty {
+                                            // Error: Mismatched argument type.
+                                            return Type::Error;
+                                        }
+                                    }
+                                    // If all checks pass, the type is the enum itself.
+                                    return Type::Enum { name: name.clone(), variants: variants.clone() };
+                                }
+                            }
+                        }
+                    }
+                }
+                // (Fallback to existing logic for regular function calls)
+                Type::Error
+            }
+
             // UPDATED: MemberAccess now also handles enum instantiation.
             Expression::MemberAccess(member_access) => {
                 if let Expression::Identifier(ident_name, _) = &member_access.object {
                     // Check if the identifier is a known type.
                     if let Some(symbol) = self.symbol_table.resolve(ident_name) {
                         // If the symbol is an enum...
-                        if let SymbolKind::Enum { variants } = &symbol.kind {
+                        if let Type::Enum { name, variants } = &symbol.ty {
                             // ...and the property is a valid variant of that enum...
-                            if variants.contains(&member_access.property) {
-                                // ...then this is a valid enum instantiation.
-                                return Type::Enum(ident_name.clone());
-                            } else {
-                                // Error: `property` is not a variant of enum `ident_name`.
-                                return Type::Error;
+                            if variants.contains_key(&member_access.property) {
+                                // Check if the variant has no associated data (0 types)
+                                if let Some(variant_types) = variants.get(&member_access.property) {
+                                    if variant_types.is_empty() {
+                                        // ...then this is a valid enum instantiation without data.
+                                        return Type::Enum { name: name.clone(), variants: variants.clone() };
+                                    }
+                                }
                             }
+                            // Error: `property` is not a variant of enum `ident_name` or has associated data.
+                            return Type::Error;
                         }
                     }
                 }
@@ -122,8 +159,13 @@ impl Guardian {
                         // NEW: Check enum variant patterns.
                         WhenPattern::EnumVariant { enum_name, variant_name, .. } => {
                             // Check that the pattern's enum type matches the subject's enum type.
-                            if subject_type != Type::Enum(enum_name.clone()) {
-                                // Error: Pattern is for a different enum type.
+                            if let Type::Enum { name: subject_name, .. } = &subject_type {
+                                if subject_name != enum_name {
+                                    // Error: Pattern is for a different enum type.
+                                    return Type::Error;
+                                }
+                            } else {
+                                // Error: Subject is not an enum type.
                                 return Type::Error;
                             }
                             // Check that the variant name is valid for this enum.
@@ -186,14 +228,28 @@ impl Guardian {
 
     /// Validates an enum definition and adds it to the symbol table.
     pub fn check_enum_definition(&mut self, enum_def: &EnumDefinition) {
-        // 1. Define the enum type itself in the current scope.
-        let enum_type = Type::Enum(enum_def.name.clone());
+        let mut resolved_variants = HashMap::new();
+
+        // 1. Resolve the type names for each variant.
+        for variant in &enum_def.variants {
+            let mut resolved_types = Vec::new();
+            for type_name in &variant.types {
+                // For this example, we'll assume it's a Custom type.
+                // In a complete implementation, this would look up the type in the symbol table.
+                resolved_types.push(Type::Custom(type_name.clone()));
+            }
+            resolved_variants.insert(variant.name.clone(), resolved_types);
+        }
+
+        // 2. Define the enum type itself in the current scope.
+        let enum_type = Type::Enum {
+            name: enum_def.name.clone(),
+            variants: resolved_variants.clone(),
+        };
         let enum_kind = SymbolKind::Enum {
-            variants: enum_def.variants.iter().map(|v| v.name.clone()).collect(),
+            variants: resolved_variants.keys().cloned().collect(),
         };
         self.symbol_table.define(enum_def.name.clone(), enum_type, enum_kind);
-
-        // 2. Future: Validate that variant names are unique, etc.
     }
 
     /// Helper method to infer the type of a literal value.

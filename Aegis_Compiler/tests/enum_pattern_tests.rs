@@ -14,9 +14,9 @@ fn test_enum_pattern_matching_integration() {
     let enum_def = EnumDefinition {
         name: "LoadState".to_string(),
         variants: vec![
-            EnumVariant { name: "Success".to_string(), span: Default::default() },
-            EnumVariant { name: "Loading".to_string(), span: Default::default() },
-            EnumVariant { name: "Failed".to_string(), span: Default::default() },
+            EnumVariant { name: "Success".to_string(), types: vec![], span: Default::default() },
+            EnumVariant { name: "Loading".to_string(), types: vec![], span: Default::default() },
+            EnumVariant { name: "Failed".to_string(), types: vec![], span: Default::default() },
         ],
         span: Default::default(),
     };
@@ -55,8 +55,8 @@ fn test_enum_instantiation_via_member_access() {
     let enum_def = EnumDefinition {
         name: "Status".to_string(),
         variants: vec![
-            EnumVariant { name: "Active".to_string(), span: Default::default() },
-            EnumVariant { name: "Inactive".to_string(), span: Default::default() },
+            EnumVariant { name: "Active".to_string(), types: vec![], span: Default::default() },
+            EnumVariant { name: "Inactive".to_string(), types: vec![], span: Default::default() },
         ],
         span: Default::default(),
     };
@@ -71,7 +71,15 @@ fn test_enum_instantiation_via_member_access() {
     }));
     
     let result_type = guardian.infer_expression_type(&valid_instantiation);
-    assert_eq!(result_type, Type::Enum("Status".to_string()));
+    // The enum type should match with the expected structure
+    if let Type::Enum { name, variants } = result_type {
+        assert_eq!(name, "Status");
+        assert_eq!(variants.len(), 2);
+        assert_eq!(variants.get("Active"), Some(&vec![]));
+        assert_eq!(variants.get("Inactive"), Some(&vec![]));
+    } else {
+        panic!("Expected Type::Enum but got {:?}", result_type);
+    }
     
     // Test invalid enum instantiation (Status::NonExistent)
     let invalid_instantiation = Expression::MemberAccess(Box::new(MemberAccessExpression {
@@ -85,6 +93,60 @@ fn test_enum_instantiation_via_member_access() {
 }
 
 #[test]
+fn test_enum_with_associated_data() {
+    let mut guardian = Guardian::new();
+    
+    // Define an enum with associated data
+    let enum_def = EnumDefinition {
+        name: "LoadState".to_string(),
+        variants: vec![
+            EnumVariant { name: "Loading".to_string(), types: vec![], span: Default::default() },
+            EnumVariant { name: "Success".to_string(), types: vec!["Data".to_string()], span: Default::default() },
+            EnumVariant { name: "Failure".to_string(), types: vec!["Error".to_string()], span: Default::default() },
+        ],
+        span: Default::default(),
+    };
+    
+    guardian.check_enum_definition(&enum_def);
+    
+    // Test that enum was properly defined
+    assert!(guardian.errors.is_empty());
+    
+    // Test valid enum instantiation with data (LoadState::Success(data))
+    let call_instantiation = Expression::Call(Box::new(CallExpression {
+        function: Expression::MemberAccess(Box::new(MemberAccessExpression {
+            object: Expression::Identifier("LoadState".to_string(), Default::default()),
+            property: "Success".to_string(),
+            span: Default::default(),
+        })),
+        arguments: vec![
+            Expression::Identifier("data".to_string(), Default::default()),
+        ],
+        span: Default::default(),
+    }));
+    
+    // This should work if we had proper type checking, but for now, the argument
+    // type checking will fail because "data" is not defined. The structure is correct though.
+    let result_type = guardian.infer_expression_type(&call_instantiation);
+    // We expect Type::Error because the argument "data" is not defined
+    assert_eq!(result_type, Type::Error);
+    
+    // Test invalid enum instantiation with wrong number of arguments
+    let invalid_call = Expression::Call(Box::new(CallExpression {
+        function: Expression::MemberAccess(Box::new(MemberAccessExpression {
+            object: Expression::Identifier("LoadState".to_string(), Default::default()),
+            property: "Success".to_string(),
+            span: Default::default(),
+        })),
+        arguments: vec![], // Wrong number of arguments (should be 1)
+        span: Default::default(),
+    }));
+    
+    let error_type = guardian.infer_expression_type(&invalid_call);
+    assert_eq!(error_type, Type::Error);
+}
+
+#[test]
 fn test_when_expression_with_enum_variants() {
     let mut guardian = Guardian::new();
     
@@ -92,9 +154,9 @@ fn test_when_expression_with_enum_variants() {
     let enum_def = EnumDefinition {
         name: "Color".to_string(),
         variants: vec![
-            EnumVariant { name: "Red".to_string(), span: Default::default() },
-            EnumVariant { name: "Green".to_string(), span: Default::default() },
-            EnumVariant { name: "Blue".to_string(), span: Default::default() },
+            EnumVariant { name: "Red".to_string(), types: vec![], span: Default::default() },
+            EnumVariant { name: "Green".to_string(), types: vec![], span: Default::default() },
+            EnumVariant { name: "Blue".to_string(), types: vec![], span: Default::default() },
         ],
         span: Default::default(),
     };

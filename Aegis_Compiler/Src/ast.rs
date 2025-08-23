@@ -307,5 +307,7 @@ pub struct EnumDefinition {
 #[derive(Debug, Clone)]
 pub struct EnumVariant {
     pub name: String,
+    /// A list of types associated with this variant, e.g., the `Data` in `Success(Data)`.
+    pub types: Vec<String>, // Using String for now, to be resolved by the Guardian.
     pub span: Span,
 }
