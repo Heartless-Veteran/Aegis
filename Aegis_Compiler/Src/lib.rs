@@ -24,6 +24,7 @@ pub mod architect_impl;
 // Re-export the main types
 pub use architect_impl::Architect;
 pub use guardian_impl::Guardian;
+pub use Scribe; // Export Scribe from mod.rs
 pub use token::{Token, Span};
 pub use ast::Expression;
 
