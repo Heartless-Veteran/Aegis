@@ -289,6 +289,15 @@ jobs:
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Aegis Programming Language</title>
               <meta name="description" content="A universal programming language for joyful, safe, and powerful creation">
+              <meta name="keywords" content="Aegis, programming language, Rust, Android, declarative, reactive">
+              <meta name="author" content="Heartless-Veteran">
+              <meta property="og:title" content="Aegis Programming Language">
+              <meta property="og:description" content="A universal programming language for joyful, safe, and powerful creation">
+              <meta property="og:type" content="website">
+              <meta property="og:url" content="https://heartless-veteran.github.io/Aegis/">
+              <meta name="twitter:card" content="summary">
+              <meta name="twitter:title" content="Aegis Programming Language">
+              <meta name="twitter:description" content="A universal programming language for joyful, safe, and powerful creation">
               <link rel="stylesheet" href="assets/style.css">
           </head>
           <body>
@@ -449,6 +458,58 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs-site/
+
+      - name: Generate sitemap
+        run: |
+          # Generate a basic sitemap for SEO
+          cat > docs-site/sitemap.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>https://heartless-veteran.github.io/Aegis/</loc>
+              <lastmod>$(date -I)</lastmod>
+              <changefreq>weekly</changefreq>
+              <priority>1.0</priority>
+            </url>
+            <url>
+              <loc>https://heartless-veteran.github.io/Aegis/README.html</loc>
+              <lastmod>$(date -I)</lastmod>
+              <changefreq>weekly</changefreq>
+              <priority>0.8</priority>
+            </url>
+            <url>
+              <loc>https://heartless-veteran.github.io/Aegis/guide/guide.html</loc>
+              <lastmod>$(date -I)</lastmod>
+              <changefreq>weekly</changefreq>
+              <priority>0.9</priority>
+            </url>
+            <url>
+              <loc>https://heartless-veteran.github.io/Aegis/AEGIS_PROJECT_BIBLE.html</loc>
+              <lastmod>$(date -I)</lastmod>
+              <changefreq>monthly</changefreq>
+              <priority>0.7</priority>
+            </url>
+            <url>
+              <loc>https://heartless-veteran.github.io/Aegis/Roadmap.html</loc>
+              <lastmod>$(date -I)</lastmod>
+              <changefreq>monthly</changefreq>
+              <priority>0.6</priority>
+            </url>
+            <url>
+              <loc>https://heartless-veteran.github.io/Aegis/api/aegis_compiler/index.html</loc>
+              <lastmod>$(date -I)</lastmod>
+              <changefreq>daily</changefreq>
+              <priority>0.5</priority>
+            </url>
+          </urlset>
+          EOF
+
+          # Generate robots.txt
+          cat > docs-site/robots.txt << 'EOF'
+          User-agent: *
+          Allow: /
+          Sitemap: https://heartless-veteran.github.io/Aegis/sitemap.xml
+          EOF
 
   # Deploy to GitHub Pages
   deploy-docs:

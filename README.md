@@ -57,3 +57,15 @@ cd Aegis_Compiler
 ./run_tests.sh  # Unix/Linux/macOS
 # or run_tests.bat on Windows
 ```
+
+## 📖 Documentation
+
+The complete project documentation is available at our [GitHub Pages site](https://heartless-veteran.github.io/Aegis/), which includes:
+
+- **Language Guide**: Learn Aegis syntax and features
+- **Project Bible**: Comprehensive project documentation  
+- **API Documentation**: Detailed technical reference
+- **Roadmap**: Development plans and milestones
+- **CI/CD Workflows**: Development process documentation
+
+The documentation is automatically built and deployed from the main branch using GitHub Actions.
