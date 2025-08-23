@@ -121,6 +121,8 @@ pub struct Parameter {
 #[derive(Debug, Clone)]
 pub struct ContractDefinition {
     pub name: String,
+    /// NEW: A list of generic type parameters, e.g., the `T` in `contract Option<T>`.
+    pub generic_params: Vec<String>,
     pub fields: Vec<ContractField>,
     pub span: Span,
 }
@@ -129,8 +131,22 @@ pub struct ContractDefinition {
 #[derive(Debug, Clone)]
 pub struct ContractField {
     pub name: String,
-    pub type_annotation: String,
+    /// UPDATED: The type is now represented by a `TypeIdentifier` node.
+    pub type_ann: TypeIdentifier,
     pub span: Span,
+}
+
+/// NEW: Represents a type identifier in the source code, which can be generic.
+#[derive(Debug, Clone)]
+pub enum TypeIdentifier {
+    /// A simple type like `Number` or `String`.
+    Simple { name: String, span: Span },
+    /// A generic type like `List<Number>` or `Option<T>`.
+    Generic {
+        name: String,
+        args: Vec<TypeIdentifier>,
+        span: Span,
+    },
 }
 
 /// App definition

@@ -159,6 +159,50 @@ impl<'a> Architect<'a> {
             return None;
         };
         
+        // Parse generic parameters if present: <T>, <T, U>, etc.
+        let mut generic_params = Vec::new();
+        if matches!(self.current_token, Token::LessThan(_)) {
+            self.next_token(); // consume '<'
+            
+            // Parse first parameter
+            if let Token::Identifier(param_name, _) = &self.current_token {
+                generic_params.push(param_name.clone());
+                self.next_token();
+                
+                // Parse additional parameters separated by commas
+                while matches!(self.current_token, Token::Comma(_)) {
+                    self.next_token(); // consume ','
+                    
+                    if let Token::Identifier(param_name, _) = &self.current_token {
+                        generic_params.push(param_name.clone());
+                        self.next_token();
+                    } else {
+                        self.errors.push(ParseError {
+                            message: "Expected generic parameter name after comma".to_string(),
+                            span: self.current_token.span(),
+                        });
+                        return None;
+                    }
+                }
+                
+                // Expect closing '>'
+                if !matches!(self.current_token, Token::GreaterThan(_)) {
+                    self.errors.push(ParseError {
+                        message: "Expected '>' to close generic parameters".to_string(),
+                        span: self.current_token.span(),
+                    });
+                    return None;
+                }
+                self.next_token(); // consume '>'
+            } else {
+                self.errors.push(ParseError {
+                    message: "Expected generic parameter name after '<'".to_string(),
+                    span: self.current_token.span(),
+                });
+                return None;
+            }
+        }
+        
         // Expect colon
         if !matches!(self.current_token, Token::Colon(_)) {
             self.errors.push(ParseError {
@@ -190,7 +234,10 @@ impl<'a> Architect<'a> {
                         
                         fields.push(ContractField {
                             name: field_name,
-                            type_annotation: type_name,
+                            type_ann: TypeIdentifier::Simple {
+                                name: type_name,
+                                span: self.current_token.span(),
+                            },
                             span: field_start_span,
                         });
                     } else {
@@ -211,6 +258,7 @@ impl<'a> Architect<'a> {
         
         Some(ContractDefinition {
             name,
+            generic_params,
             fields,
             span: start_span,
         })
