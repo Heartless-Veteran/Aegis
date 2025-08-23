@@ -8,7 +8,7 @@ on:
     paths: ['Docs/**', 'README.md', 'Aegis_Compiler/Src/**/*.rs', 'AEGIS_PROJECT_BIBLE.md', 'Roadmap.md']
 
 jobs:
-  # Build and deploy documentation
+  # Build documentation
   docs:
     name: Build Documentation
     runs-on: ubuntu-latest
@@ -506,28 +506,24 @@ jobs:
           Sitemap: https://heartless-veteran.github.io/Aegis/sitemap.xml
           EOF
 
-      - name: Deploy to GitHub Pages (Simple)
-        if: github.ref == 'refs/heads/main'
+      - name: Archive documentation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-site
+          path: docs-site/
+
+      - name: Show build results
         run: |
-          # Configure git
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Create or update gh-pages branch
-          git checkout --orphan gh-pages || git checkout gh-pages
-          
-          # Clear existing content
-          git rm -rf . || true
-          
-          # Copy documentation site
-          cp -r docs-site/* .
-          
-          # Add and commit
-          git add .
-          git commit -m "Deploy documentation - $(date)" || echo "No changes to commit"
-          
-          # Push to gh-pages branch
-          git push origin gh-pages --force
+          echo "Documentation built successfully!"
+          echo "Site contents:"
+          ls -la docs-site/
+          echo ""
+          echo "To enable GitHub Pages:"
+          echo "1. Go to repository Settings > Pages"
+          echo "2. Select 'Deploy from a branch'"
+          echo "3. Choose 'gh-pages' branch (or set up GitHub Actions deployment)"
+          echo ""
+          echo "The documentation artifacts have been uploaded and can be downloaded from the Actions tab."
 
   # Validate documentation links and examples
   validate-docs:
