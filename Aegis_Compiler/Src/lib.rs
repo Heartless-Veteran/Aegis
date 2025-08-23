@@ -3,6 +3,7 @@
 pub mod token;
 pub mod ast;
 pub mod error;
+use crate::token::{Token, Span};
 
 // Include the Scribe from mod.rs
 include!("mod.rs");
