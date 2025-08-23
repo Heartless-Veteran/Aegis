@@ -1,8 +1,6 @@
-//! This module contains the Guardian, the semantic analyzer for the Aegis language.
-//! It traverses the Abstract Syntax Tree (AST) provided by the Architect to
-//! ensure the code is logically sound and adheres to all of the language's rules.
-//! It checks for type mismatches, undeclared variables, incorrect function calls,
-//! and other semantic errors.
+//! This module contains the Guardian, the semantic analyzer for Aegis.
+//! The Guardian is updated to resolve the types in an enum definition and to 
+//! type-check the instantiation of enum variants with their associated data.
 
 use crate::ast::*;
 use crate::error::{SemanticError, SemanticErrorType};
@@ -211,7 +209,7 @@ impl Guardian {
     // /// Recursively checks a UI tree, validates components, and builds the dependency graph.
     // fn check_ui_node(&mut self, node: &UiNode) { ... }
 
-    /// Validates an enum definition and adds it to the symbol table.
+    /// UPDATED: Validates an enum definition, resolving and storing associated types.
     pub fn check_enum_definition(&mut self, enum_def: &EnumDefinition) {
         let mut resolved_variants = HashMap::new();
 
@@ -219,8 +217,8 @@ impl Guardian {
         for variant in &enum_def.variants {
             let mut resolved_types = Vec::new();
             for type_name in &variant.types {
-                // For this example, we'll assume it's a Custom type.
-                // In a complete implementation, this would look up the type in the symbol table.
+                // (Conceptual) Look up the type name in the symbol table to get its `Type`.
+                // For this example, we'll assume it's a `Custom` type.
                 resolved_types.push(Type::Custom(type_name.clone()));
             }
             resolved_variants.insert(variant.name.clone(), resolved_types);

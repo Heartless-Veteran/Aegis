@@ -38,6 +38,9 @@ pub enum Expression {
     Infix(Box<InfixExpression>),
     If(Box<IfExpression>),
     When(Box<WhenExpression>),
+    /// A function or method call, e.g., `my_func(a, b)`.
+    /// NOTE: Instantiating an enum with data is now parsed as a `Call` expression,
+    /// where the `function` is a `MemberAccess` expression, e.g., `LoadState::Success(data)`.
     Call(Box<CallExpression>),
     MemberAccess(Box<MemberAccessExpression>),
     Await(Box<AwaitExpression>),
@@ -295,7 +298,7 @@ pub struct MapLiteral {
     pub span: Span,
 }
 
-/// Enum definition
+/// Represents an `enum` definition block.
 #[derive(Debug, Clone)]
 pub struct EnumDefinition {
     pub name: String,
@@ -303,11 +306,11 @@ pub struct EnumDefinition {
     pub span: Span,
 }
 
-/// Enum variant
+/// UPDATED: Represents a single variant within an `enum`, now with associated types.
 #[derive(Debug, Clone)]
 pub struct EnumVariant {
     pub name: String,
-    /// A list of types associated with this variant, e.g., the `Data` in `Success(Data)`.
+    /// NEW: A list of types associated with this variant, e.g., the `Data` in `Success(Data)`.
     pub types: Vec<String>, // Using String for now, to be resolved by the Guardian.
     pub span: Span,
 }
