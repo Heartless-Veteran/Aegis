@@ -102,6 +102,8 @@ pub enum Token {
     Await(Span),
     /// The literal for a null or empty value, `nothing`.
     Nothing(Span),
+    /// The `enum` keyword for defining sum types.
+    Enum(Span),
 }
 
 /// Helper methods for the `Token` enum.
@@ -123,7 +125,8 @@ impl Token {
             Token::Contract(s) | Token::For(s) | Token::In(s) |
             Token::Is(s) | Token::Return(s) | Token::True(s) |
             Token::False(s) | Token::If(s) | Token::Else(s) |
-            Token::Async(s) | Token::Await(s) | Token::Nothing(s) => *s,
+            Token::Async(s) | Token::Await(s) | Token::Nothing(s) |
+            Token::Enum(s) => *s,
         }
     }
 

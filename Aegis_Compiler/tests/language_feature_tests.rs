@@ -229,6 +229,46 @@ fn test_ui_show_tokens() {
 }
 
 #[test]
+fn test_enum_definition_tokens() {
+    let input = "enum Status:";
+    let mut scribe = Scribe::new(input);
+    
+    let tokens: Vec<Token> = std::iter::from_fn(|| {
+        let token = scribe.next_token();
+        match token {
+            Token::Eof(_) => None,
+            _ => Some(token),
+        }
+    }).collect();
+    
+    assert_eq!(tokens.len(), 3);
+    assert!(matches!(tokens[0], Token::Enum(_)));
+    assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "Status"));
+    assert!(matches!(tokens[2], Token::Colon(_)));
+}
+
+#[test]
+fn test_enum_with_variants_tokens() {
+    let input = "enum Result: Success Failed";
+    let mut scribe = Scribe::new(input);
+    
+    let tokens: Vec<Token> = std::iter::from_fn(|| {
+        let token = scribe.next_token();
+        match token {
+            Token::Eof(_) => None,
+            _ => Some(token),
+        }
+    }).collect();
+    
+    assert_eq!(tokens.len(), 5);
+    assert!(matches!(tokens[0], Token::Enum(_)));
+    assert!(matches!(tokens[1], Token::Identifier(ref s, _) if s == "Result"));
+    assert!(matches!(tokens[2], Token::Colon(_)));
+    assert!(matches!(tokens[3], Token::Identifier(ref s, _) if s == "Success"));
+    assert!(matches!(tokens[4], Token::Identifier(ref s, _) if s == "Failed"));
+}
+
+#[test]
 fn test_complete_language_constructs() {
     // Test that all major language constructs can be tokenized
     let constructs = vec![
@@ -236,6 +276,7 @@ fn test_complete_language_constructs() {
         "let's track counter = 0",
         "async let's fetch():",
         "contract User:",
+        "enum Status:",
         "app MyApp:",
         "if condition:",
         "for item in items:",

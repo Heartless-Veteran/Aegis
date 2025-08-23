@@ -89,6 +89,7 @@ impl<'a> Scribe<'a> {
             "for" => Token::For(span), "in" => Token::In(span), "is" => Token::Is(span),
             "async" => Token::Async(span), "await" => Token::Await(span), "show" => Token::Show(span),
             "nothing" => Token::Nothing(span), "return" => Token::Return(span),
+            "enum" => Token::Enum(span),
             _ => Token::Identifier(literal.to_string(), span),
         }
     }

@@ -24,7 +24,7 @@ fn test_simple_tokens() {
 
 #[test]
 fn test_keywords() {
-    let input = "let's app track when show";
+    let input = "let's app track when show enum";
     let mut scribe = Scribe::new(input);
     
     let token1 = scribe.next_token();
@@ -32,12 +32,14 @@ fn test_keywords() {
     let token3 = scribe.next_token();
     let token4 = scribe.next_token();
     let token5 = scribe.next_token();
+    let token6 = scribe.next_token();
     
     assert!(matches!(token1, Token::Let(_)));
     assert!(matches!(token2, Token::App(_)));
     assert!(matches!(token3, Token::Track(_)));
     assert!(matches!(token4, Token::When(_)));
     assert!(matches!(token5, Token::Show(_)));
+    assert!(matches!(token6, Token::Enum(_)));
 }
 
 #[test]

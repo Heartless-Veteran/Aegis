@@ -48,9 +48,15 @@ impl Guardian {
 
     /// Dispatches to the correct checking function based on the definition type.
     fn check_definition(&mut self, def: &Definition) {
-        // This is a placeholder for the full dispatch logic. In a real implementation,
-        // it would look at the current definition and decide which specific check
-        // function to call (e.g., `check_function_definition`).
+        match def {
+            Definition::Enum(enum_def) => self.check_enum_definition(enum_def),
+            // Other definition types would be handled here in a complete implementation
+            _ => {
+                // This is a placeholder for the full dispatch logic. In a real implementation,
+                // it would look at the current definition and decide which specific check
+                // function to call (e.g., `check_function_definition`).
+            }
+        }
     }
 
     /// Dispatches to the correct checking function for a statement.
@@ -94,4 +100,16 @@ impl Guardian {
     //
     // /// Recursively checks a UI tree, validates components, and builds the dependency graph.
     // fn check_ui_node(&mut self, node: &UiNode) { ... }
+
+    /// Validates an enum definition and adds it to the symbol table.
+    fn check_enum_definition(&mut self, enum_def: &EnumDefinition) {
+        // 1. Define the enum type itself in the current scope.
+        let enum_type = Type::Enum(enum_def.name.clone());
+        let enum_kind = SymbolKind::Enum {
+            variants: enum_def.variants.iter().map(|v| v.name.clone()).collect(),
+        };
+        self.symbol_table.define(enum_def.name.clone(), enum_type, enum_kind);
+
+        // 2. Future: Validate that variant names are unique, etc.
+    }
 }
