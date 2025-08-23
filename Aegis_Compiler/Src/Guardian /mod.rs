@@ -11,19 +11,14 @@ use crate::guardian_types::Type;
 use std::collections::HashMap;
 
 /// The Guardian walks the AST to find semantic errors and build metadata.
+#[derive(Default)]
 pub struct Guardian {
     /// A list of semantic errors found during analysis.
     pub errors: Vec<SemanticError>,
     /// The symbol table for managing scopes and declared identifiers.
     symbol_table: SymbolTable,
-    /// The dependency graph for the reactive UI system.
-    /// Maps a tracked variable name to a list of UI node IDs that use it.
-    dependency_graph: HashMap<String, Vec<String>>,
-    /// Context flag for validating that `await` is only used inside `async` functions.
-    is_in_async_context: bool,
-    /// Context for validating that `return` statements match the function's signature.
-    current_return_type: Option<Type>,
-    // Other context fields can be added here as needed.
+    // Note: Additional context fields like dependency_graph, is_in_async_context, 
+    // and current_return_type will be added when implementing those features.
 }
 
 impl Guardian {
@@ -32,9 +27,6 @@ impl Guardian {
         Self {
             errors: Vec::new(),
             symbol_table: SymbolTable::default(),
-            dependency_graph: HashMap::new(),
-            is_in_async_context: false,
-            current_return_type: None,
         }
     }
 
@@ -57,12 +49,6 @@ impl Guardian {
                 // function to call (e.g., `check_function_definition`).
             }
         }
-    }
-
-    /// Dispatches to the correct checking function for a statement.
-    fn check_statement(&mut self, stmt: &Statement) {
-        // This is a placeholder for the full dispatch logic for statements like
-        // `let's`, `for`, `return`, etc.
     }
 
     /// The main entry point for type inference and checking of expressions.
@@ -190,7 +176,7 @@ impl Guardian {
 
                 // Ensure all cases return the same type.
                 if case_types.windows(2).all(|w| w[0] == w[1]) {
-                    case_types.get(0).cloned().unwrap_or(Type::Nothing)
+                    case_types.first().cloned().unwrap_or(Type::Nothing)
                 } else {
                     // Error: `when` expression cases must return the same type.
                     Type::Error
