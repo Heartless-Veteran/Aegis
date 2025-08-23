@@ -1,0 +1,91 @@
+# Jekyll configuration for Aegis Programming Language
+title: "Aegis Programming Language"
+description: "A universal programming language for joyful, safe, and powerful creation"
+url: "https://heartless-veteran.github.io"
+baseurl: "/Aegis"
+
+# Site metadata
+author: "Heartless-Veteran"
+email: ""
+version: "0.2.0-alpha"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+header_pages:
+  - README.md
+  - Docs/guide.md
+  - Roadmap.md
+  - AEGIS_PROJECT_BIBLE.md
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name/
+
+# Default settings
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "page"
+
+# Exclude files from processing
+exclude:
+  - Cargo.toml
+  - Cargo.lock
+  - target/
+  - .git/
+  - .github/
+  - scripts/
+  - Aegis_Compiler/
+  - Aegis_LSP/
+  - Aegis_Bridge/
+  - Examples/
+  - Specification/
+  - .devcontainer/
+  - renovate.json
+  - sonar-project.properties
+  - codecov.yml
+
+# Include files
+include:
+  - _docs
+  - assets
+
+# Markdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+
+# SEO settings
+twitter:
+  username: ""
+  card: summary_large_image
+
+social:
+  name: Aegis Programming Language
+  links:
+    - https://github.com/Heartless-Veteran/Aegis
