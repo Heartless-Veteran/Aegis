@@ -247,25 +247,45 @@ impl Guardian {
         }
     }
 
-    /// Checks a contract definition and registers it as a new type.
-    pub fn check_contract_definition(&mut self, contract: &ContractDefinition) {
-        let mut fields = HashMap::new();
-        
-        // Process each field in the contract
-        for field in &contract.fields {
-            let field_type = self.resolve_type_from_string(&field.type_annotation);
-            fields.insert(field.name.clone(), field_type);
+    /// UPDATED: This function now handles generic parameters in contract definitions.
+    pub fn check_contract_definition(&mut self, contract_def: &ContractDefinition) {
+        // 1. Create a temporary scope for resolving generic types within the contract.
+        let mut contract_scope = SymbolTable::new_enclosed(self.symbol_table.clone());
+        for param in &contract_def.generic_params {
+            // Register each generic parameter as a `Generic` type within this scope.
+            let generic_type = Type::Generic(param.clone());
+            contract_scope.define(param.clone(), generic_type, SymbolKind::Type);
         }
+
+        // 2. Resolve the types of the fields using the temporary scope.
+        let mut resolved_fields = HashMap::new();
+        for field in &contract_def.fields {
+            let field_type = self.resolve_type_identifier(&field.type_ann, &contract_scope);
+            resolved_fields.insert(field.name.clone(), field_type);
+        }
+
+        // 3. Define the contract in the main scope.
+        // The symbol will note that this is a generic type definition.
+        let contract_kind = if contract_def.generic_params.is_empty() {
+            // Regular contract
+            SymbolKind::Contract {
+                fields: resolved_fields,
+            }
+        } else {
+            // Generic contract
+            SymbolKind::GenericContract {
+                params: contract_def.generic_params.clone(),
+                fields: resolved_fields,
+            }
+        };
         
-        // Create the contract type
-        let contract_type = Type::Custom(contract.name.clone());
-        let contract_kind = SymbolKind::Contract { fields };
+        // The "type" here is a placeholder, as it can't be a concrete type until instantiated.
+        let contract_type = Type::Custom(contract_def.name.clone());
         
-        // Define the contract type in the symbol table
-        if !self.symbol_table.define(contract.name.clone(), contract_type, contract_kind) {
+        if !self.symbol_table.define(contract_def.name.clone(), contract_type, contract_kind) {
             self.errors.push(SemanticError::new(
-                format!("Contract '{}' is already declared", contract.name),
-                contract.span.clone(),
+                format!("Contract '{}' is already declared", contract_def.name),
+                contract_def.span.clone(),
                 SemanticErrorType::DuplicateDeclaration,
             ));
         }
@@ -465,5 +485,85 @@ impl Guardian {
             (a, b) if a == b => true,
             _ => false,
         }
+    }
+
+    /// UPDATED: This helper function can now resolve fully instantiated generic types.
+    fn resolve_type_identifier(&mut self, type_ann: &TypeIdentifier, scope: &SymbolTable) -> Type {
+        match type_ann {
+            TypeIdentifier::Simple { name, .. } => {
+                // First check if it's a built-in type
+                match name.as_str() {
+                    "number" => Type::Number,
+                    "string" => Type::String,
+                    "boolean" => Type::Boolean,
+                    "nothing" => Type::Nothing,
+                    _ => {
+                        // Then check the scope for user-defined types
+                        scope.resolve(name).map_or(Type::Error, |s| s.ty.clone())
+                    }
+                }
+            }
+            TypeIdentifier::Generic { name, args, .. } => {
+                // Check if the base type is a known generic contract.
+                if let Some(symbol) = scope.resolve(name) {
+                    if let SymbolKind::GenericContract { params, .. } = &symbol.kind {
+                        // Ensure the correct number of type arguments are provided.
+                        if params.len() != args.len() {
+                            // Error: Wrong number of generic arguments.
+                            return Type::Error;
+                        }
+                        // Recursively resolve each type argument.
+                        let resolved_args = args
+                            .iter()
+                            .map(|arg| self.resolve_type_identifier(arg, scope))
+                            .collect();
+                        
+                        // Return the fully resolved concrete type.
+                        return Type::Concrete { name: name.clone(), args: resolved_args };
+                    }
+                }
+                Type::Error
+            }
+        }
+    }
+    
+    /// This is a conceptual update to show how contract initializers would be checked.
+    fn check_contract_initializer(
+        &mut self,
+        expected_type: &Type,
+        initializer_fields: &Vec<(String, Expression)>
+    ) -> Type {
+        // We expect to be checking an initializer against a concrete generic type.
+        if let Type::Concrete { name, args } = expected_type {
+            if let Some(symbol) = self.symbol_table.resolve(name) {
+                if let SymbolKind::GenericContract { params, fields } = &symbol.kind {
+                    // 1. Create a mapping from generic parameters to concrete types.
+                    //    e.g., `T` -> `Number`
+                    let type_map: HashMap<_, _> = params.iter().zip(args.iter()).collect();
+
+                    // 2. Check the initializer's fields.
+                    for (field_name, field_value) in initializer_fields {
+                        if let Some(generic_field_type) = fields.get(field_name) {
+                            // 3. Substitute the generic type with the concrete type from our map.
+                            let concrete_field_type = match generic_field_type {
+                                Type::Generic(param_name) => type_map.get(param_name)
+                                    .cloned() // Get the concrete type (`Number`)
+                                    .unwrap_or(&Type::Error), // Or error if not found
+                                _ => generic_field_type, // It was already a concrete type
+                            };
+
+                            // 4. Infer the type of the value provided and check if it matches.
+                            let value_type = self.infer_expression_type(field_value);
+                            if &value_type != concrete_field_type {
+                                // Error: Mismatched type for field.
+                            }
+                        }
+                    }
+                    // If all checks pass, the initializer is valid.
+                    return expected_type.clone();
+                }
+            }
+        }
+        Type::Error
     }
 }

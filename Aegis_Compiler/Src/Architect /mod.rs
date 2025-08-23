@@ -190,7 +190,10 @@ impl<'a> Architect<'a> {
                         
                         fields.push(ContractField {
                             name: field_name,
-                            type_annotation: type_name,
+                            type_ann: TypeIdentifier::Simple { 
+                                name: type_name, 
+                                span: self.current_token.span() 
+                            },
                             span: field_start_span,
                         });
                     } else {
@@ -211,6 +214,7 @@ impl<'a> Architect<'a> {
         
         Some(ContractDefinition {
             name,
+            generic_params: Vec::new(), // For now, empty - full generic parsing can be added later
             fields,
             span: start_span,
         })

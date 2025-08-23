@@ -55,4 +55,13 @@ pub enum Type {
         params: Vec<Type>,
         return_type: Box<Type>,
     },
+    
+    // NEW: A placeholder for a generic type parameter like `T`.
+    Generic(String),
+    
+    // NEW: Represents an instantiated generic type, e.g., `Option<Number>`.
+    Concrete {
+        name: String,
+        args: Vec<Type>,
+    },
 }

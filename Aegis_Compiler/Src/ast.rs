@@ -2,6 +2,20 @@
 
 use crate::token::Span;
 
+/// Type identifier for representing both simple and generic types
+#[derive(Debug, Clone)]
+pub enum TypeIdentifier {
+    Simple { 
+        name: String, 
+        span: Span 
+    },
+    Generic { 
+        name: String, 
+        args: Vec<TypeIdentifier>, 
+        span: Span 
+    },
+}
+
 /// The root node of any parsed Aegis file
 #[derive(Debug, Clone)]
 pub struct Program {
@@ -121,6 +135,7 @@ pub struct Parameter {
 #[derive(Debug, Clone)]
 pub struct ContractDefinition {
     pub name: String,
+    pub generic_params: Vec<String>,
     pub fields: Vec<ContractField>,
     pub span: Span,
 }
@@ -129,7 +144,7 @@ pub struct ContractDefinition {
 #[derive(Debug, Clone)]
 pub struct ContractField {
     pub name: String,
-    pub type_annotation: String,
+    pub type_ann: TypeIdentifier,
     pub span: Span,
 }
 

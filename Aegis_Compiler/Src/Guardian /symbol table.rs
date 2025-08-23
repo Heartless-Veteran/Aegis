@@ -23,6 +23,10 @@ pub enum SymbolKind {
     Contract {
         fields: HashMap<String, Type>,
     },
+    GenericContract {
+        params: Vec<String>,
+        fields: HashMap<String, Type>,
+    },
 }
 
 /// A new table is created for each new scope (e.g., function or loop bodies).
