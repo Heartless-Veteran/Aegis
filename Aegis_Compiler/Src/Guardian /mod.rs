@@ -11,6 +11,7 @@ use crate::guardian_types::Type;
 use std::collections::HashMap;
 
 /// The Guardian walks the AST to find semantic errors and build metadata.
+#[derive(Default)]
 pub struct Guardian {
     /// A list of semantic errors found during analysis.
     pub errors: Vec<SemanticError>,
@@ -175,7 +176,7 @@ impl Guardian {
 
                 // Ensure all cases return the same type.
                 if case_types.windows(2).all(|w| w[0] == w[1]) {
-                    case_types.get(0).cloned().unwrap_or(Type::Nothing)
+                    case_types.first().cloned().unwrap_or(Type::Nothing)
                 } else {
                     // Error: `when` expression cases must return the same type.
                     Type::Error
