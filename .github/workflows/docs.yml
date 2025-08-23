@@ -57,7 +57,6 @@ jobs:
           cp Roadmap.md docs-site/
           cp AEGIS_PROJECT_BIBLE.md docs-site/
           cp WORKFLOWS.md docs-site/
-          cp MARKETPLACE_APPS.md docs-site/
           
           # Create enhanced CSS file
           cat > docs-site/assets/style.css << 'EOF'

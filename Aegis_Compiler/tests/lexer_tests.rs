@@ -1,6 +1,6 @@
 //! Lexer tests for the Aegis compiler
 
-use aegis_compiler::{Scribe, Token, Span};
+use aegis_compiler::{Scribe, Token};
 
 #[test]
 fn test_simple_tokens() {

@@ -188,7 +188,7 @@ For full functionality, configure these secrets:
 - Check workflow logs in Actions tab
 - Review component-specific test results
 - Consult DEVELOPMENT.md for local development
-- Reference MARKETPLACE_APPS.md for external tool setup
+- Review workflow documentation for external tool integration
 
 ---
 
