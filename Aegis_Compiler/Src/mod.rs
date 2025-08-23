@@ -63,6 +63,8 @@ impl<'a> Scribe<'a> {
             b')' => Token::RParen(span(1)),
             b'{' => Token::LBrace(span(1)),
             b'}' => Token::RBrace(span(1)),
+            b'[' => Token::LBracket(span(1)),
+            b']' => Token::RBracket(span(1)),
             b':' => Token::Colon(span(1)),
             b',' => Token::Comma(span(1)),
             b'a'..=b'z' | b'A'..=b'Z' | b'_' => return self.read_identifier(),
