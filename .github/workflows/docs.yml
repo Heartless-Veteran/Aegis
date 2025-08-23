@@ -454,6 +454,8 @@ jobs:
 
       - name: Generate sitemap and robots.txt
         run: |
+          # Get current date
+          CURRENT_DATE=$(date -I)
           # Generate a basic sitemap for SEO
           cat > docs-site/sitemap.xml << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
