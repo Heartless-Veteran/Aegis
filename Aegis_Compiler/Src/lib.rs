@@ -14,7 +14,7 @@ pub mod guardian_impl;
 #[path = "Guardian/types.rs"]
 pub mod guardian_types;
 
-#[path = "Guardian/symbol table.rs"]
+#[path = "Guardian/symbol_table.rs"]
 pub mod guardian_symbol_table;
 
 // Architect module components
