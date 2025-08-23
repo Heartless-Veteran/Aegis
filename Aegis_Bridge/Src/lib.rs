@@ -49,8 +49,9 @@ pub extern "system" fn Java_com_aegisapp_AegisBridge_executeJs<'local>(
         let json_global = {
             let context = scope.get_current_context();
             let global = context.global(scope);
+            let json_key = deno_core::v8::String::new(scope, "JSON").unwrap();
             let json_obj = global
-                .get(scope, deno_core::v8::String::new(scope, "JSON").unwrap().into())
+                .get(scope, json_key.into())
                 .and_then(|v| v.to_object(scope));
             if let Some(json_obj) = json_obj {
                 let stringify_key = deno_core::v8::String::new(scope, "stringify").unwrap();
@@ -76,16 +77,19 @@ pub extern "system" fn Java_com_aegisapp_AegisBridge_executeJs<'local>(
             }
         };
 
-        let json_result = if let Some(json_value) = json_global {
+        let json_stringify_result = if let Some(json_value) = json_global {
             if json_value.is_undefined() || json_value.is_null() {
-                "null".to_string()
+                None
             } else {
-                json_value.to_rust_string_lossy(scope)
+                Some(json_value.to_rust_string_lossy(scope))
             }
         } else {
-            "{\"error\":\"Failed to serialize result with JSON.stringify\"}".to_string()
+            None
         };
-        let json_result = if local_result.is_string() {
+
+        let json_result = if let Some(stringified) = json_stringify_result {
+            stringified
+        } else if local_result.is_string() {
             format!("\"{}\"", local_result.to_rust_string_lossy(scope))
         } else if local_result.is_number() {
             local_result.number_value(scope).unwrap_or(0.0).to_string()
