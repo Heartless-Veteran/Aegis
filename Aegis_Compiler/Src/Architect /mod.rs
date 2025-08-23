@@ -159,6 +159,40 @@ impl<'a> Architect<'a> {
             return None;
         };
         
+        // Parse generic parameters if present
+        let mut generic_params = Vec::new();
+        if matches!(self.current_token, Token::LessThan(_)) {
+            self.next_token(); // consume '<'
+            
+            // Parse parameter list
+            loop {
+                if let Token::Identifier(param_name, _) = &self.current_token {
+                    generic_params.push(param_name.clone());
+                    self.next_token();
+                    
+                    if matches!(self.current_token, Token::Comma(_)) {
+                        self.next_token(); // consume ','
+                        continue;
+                    } else if matches!(self.current_token, Token::GreaterThan(_)) {
+                        self.next_token(); // consume '>'
+                        break;
+                    } else {
+                        self.errors.push(ParseError {
+                            message: "Expected ',' or '>' in generic parameter list".to_string(),
+                            span: self.current_token.span(),
+                        });
+                        return None;
+                    }
+                } else {
+                    self.errors.push(ParseError {
+                        message: "Expected generic parameter name".to_string(),
+                        span: self.current_token.span(),
+                    });
+                    return None;
+                }
+            }
+        }
+        
         // Expect colon
         if !matches!(self.current_token, Token::Colon(_)) {
             self.errors.push(ParseError {
@@ -214,7 +248,7 @@ impl<'a> Architect<'a> {
         
         Some(ContractDefinition {
             name,
-            generic_params: Vec::new(), // For now, empty - full generic parsing can be added later
+            generic_params,
             fields,
             span: start_span,
         })

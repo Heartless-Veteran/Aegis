@@ -15,7 +15,7 @@ pub struct Guardian {
     /// A list of semantic errors found during analysis.
     pub errors: Vec<SemanticError>,
     /// The symbol table for managing scopes and declared identifiers.
-    symbol_table: SymbolTable,
+    pub symbol_table: SymbolTable,
     // Note: Additional context fields like dependency_graph, is_in_async_context, 
     // and current_return_type will be added when implementing those features.
 }
