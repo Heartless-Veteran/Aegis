@@ -80,6 +80,8 @@ impl<'a> Architect<'a> {
         match &self.current_token {
             Token::Contract(_) => self.parse_contract_definition().map(Definition::Contract),
             Token::Let(_) => self.parse_let_statement().map(Definition::Statement),
+            Token::App(_) => self.parse_app_definition().map(Definition::App),
+            Token::Enum(_) => self.parse_enum_definition().map(Definition::Enum),
             _ => {
                 // For now, skip unknown tokens to prevent infinite loops
                 self.next_token();
