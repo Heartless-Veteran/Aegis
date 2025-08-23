@@ -43,7 +43,7 @@ pub enum Type {
     /// where the type is not known at compile time.
     Dynamic,
     
-    /// A user-defined enum type with its variants and their associated types.
+    /// UPDATED: The internal representation of an enum now includes its variants and their types.
     Enum {
         name: String,
         /// The key is the variant name, the value is the list of associated types.
