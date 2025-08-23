@@ -4,10 +4,10 @@
 //! Its primary job is to consume tokens from the Scribe and produce an AST,
 //! collecting any syntax errors it finds along the way.
 
-use crate::scribe::Scribe;
+use crate::ast::*;
 use crate::token::{Token, Span};
 use crate::error::ParseError;
-use crate::architect::ast::*;
+use crate::Scribe;
 
 /// Defines the precedence levels for operators to manage order of operations.
 /// Higher variants have higher precedence.
@@ -77,16 +77,15 @@ impl<'a> Architect<'a> {
     /// Dispatches to the correct parsing function for a top-level definition,
     /// such as an `app`, `contract`, or function.
     fn parse_definition(&mut self) -> Option<Definition> {
-        // This is a placeholder for the full dispatch logic. In a real implementation,
-        // it would look at the current token and decide which specific parse
-        // function to call (e.g., `parse_app_definition`).
-        // For example:
-        // match self.current_token {
-        //     Token::App(_) => self.parse_app_definition().map(Definition::App),
-        //     Token::Contract(_) => self.parse_contract_definition().map(Definition::Contract),
-        //     _ => self.parse_statement().map(Definition::Statement),
-        // }
-        None // Placeholder
+        match &self.current_token {
+            Token::Contract(_) => self.parse_contract_definition().map(Definition::Contract),
+            Token::Let(_) => self.parse_let_statement().map(Definition::Statement),
+            _ => {
+                // For now, skip unknown tokens to prevent infinite loops
+                self.next_token();
+                None
+            }
+        }
     }
 
     /// The core of the Pratt parser for handling expressions.
@@ -136,4 +135,283 @@ impl<'a> Architect<'a> {
     // fn parse_call_expression(&mut self, function: Expression) -> Option<Expression> { ... }
     //
     // ...and so on for every language construct.
+    
+    /// Parse a contract definition
+    fn parse_contract_definition(&mut self) -> Option<ContractDefinition> {
+        let start_span = self.current_token.span();
+        
+        // Consume 'contract' token
+        if !matches!(self.current_token, Token::Contract(_)) {
+            return None;
+        }
+        self.next_token();
+        
+        // Get contract name
+        let name = if let Token::Identifier(name, _) = &self.current_token {
+            let contract_name = name.clone();
+            self.next_token();
+            contract_name
+        } else {
+            self.errors.push(ParseError {
+                message: "Expected contract name".to_string(),
+                span: self.current_token.span(),
+            });
+            return None;
+        };
+        
+        // Expect colon
+        if !matches!(self.current_token, Token::Colon(_)) {
+            self.errors.push(ParseError {
+                message: "Expected ':' after contract name".to_string(),
+                span: self.current_token.span(),
+            });
+            return None;
+        }
+        self.next_token();
+        
+        // Parse fields (simplified - just parse lines with "name: type" format)
+        let mut fields = Vec::new();
+        while !matches!(self.current_token, Token::Eof(_)) && 
+              !matches!(self.current_token, Token::Let(_)) &&
+              !matches!(self.current_token, Token::Contract(_)) &&
+              !matches!(self.current_token, Token::App(_)) {
+            
+            if let Token::Identifier(field_name, field_span) = &self.current_token {
+                let field_name = field_name.clone();
+                let field_start_span = *field_span;
+                self.next_token();
+                
+                if matches!(self.current_token, Token::Colon(_)) {
+                    self.next_token();
+                    
+                    if let Token::Identifier(type_name, _) = &self.current_token {
+                        let type_name = type_name.clone();
+                        self.next_token();
+                        
+                        fields.push(ContractField {
+                            name: field_name,
+                            type_annotation: type_name,
+                            span: field_start_span,
+                        });
+                    } else {
+                        self.errors.push(ParseError {
+                            message: "Expected type annotation".to_string(),
+                            span: self.current_token.span(),
+                        });
+                    }
+                } else {
+                    // Skip this token and continue
+                    self.next_token();
+                }
+            } else {
+                // Skip this token and continue
+                self.next_token();
+            }
+        }
+        
+        Some(ContractDefinition {
+            name,
+            fields,
+            span: start_span,
+        })
+    }
+    
+    /// Parse a let statement
+    fn parse_let_statement(&mut self) -> Option<Statement> {
+        let start_span = self.current_token.span();
+        
+        // Consume 'let' token  
+        if !matches!(self.current_token, Token::Let(_)) {
+            return None;
+        }
+        self.next_token();
+        
+        // Check for 's' (for "let's")
+        let mut is_tracked = false;
+        if let Token::Identifier(ident, _) = &self.current_token {
+            if ident == "s" {
+                self.next_token(); // Consume 's'
+                is_tracked = false; // Regular variable
+            }
+        }
+        
+        // Check for 'track' keyword
+        if let Token::Track(_) = &self.current_token {
+            is_tracked = true;
+            self.next_token();
+        }
+        
+        // Get variable name
+        let name = if let Token::Identifier(name, _) = &self.current_token {
+            let var_name = name.clone();
+            self.next_token();
+            var_name
+        } else {
+            self.errors.push(ParseError {
+                message: "Expected variable name".to_string(),
+                span: self.current_token.span(),
+            });
+            return None;
+        };
+        
+        // Check for type annotation
+        let mut type_annotation = None;
+        if matches!(self.current_token, Token::Colon(_)) {
+            self.next_token();
+            
+            if let Token::Identifier(type_name, _) = &self.current_token {
+                type_annotation = Some(type_name.clone());
+                self.next_token();
+            }
+        }
+        
+        // Expect assignment
+        if !matches!(self.current_token, Token::Assign(_)) {
+            self.errors.push(ParseError {
+                message: "Expected '=' in let statement".to_string(),
+                span: self.current_token.span(),
+            });
+            return None;
+        }
+        self.next_token();
+        
+        // Parse value expression (simplified)
+        let value = self.parse_simple_expression()?;
+        
+        Some(Statement::Let(LetStatement {
+            name,
+            is_tracked,
+            type_annotation,
+            value,
+            span: start_span,
+        }))
+    }
+    
+    /// Parse a simple expression (number, string, identifier, or map literal)
+    fn parse_simple_expression(&mut self) -> Option<Expression> {
+        match &self.current_token {
+            Token::Number(num, span) => {
+                let expr = Expression::Literal(Literal::Number(num.clone()), *span);
+                self.next_token();
+                Some(expr)
+            }
+            Token::String(s, span) => {
+                let expr = Expression::Literal(Literal::String(s.clone()), *span);
+                self.next_token();
+                Some(expr)
+            }
+            Token::Identifier(ident, span) => {
+                let expr = Expression::Identifier(ident.clone(), *span);
+                self.next_token();
+                Some(expr)
+            }
+            Token::LBrace(_) => {
+                // Parse map literal
+                self.parse_map_literal()
+            }
+            _ => {
+                self.errors.push(ParseError {
+                    message: format!("Unexpected token in expression: {:?}", self.current_token),
+                    span: self.current_token.span(),
+                });
+                None
+            }
+        }
+    }
+    
+    /// Parse a map literal: { key: value, key: value }
+    fn parse_map_literal(&mut self) -> Option<Expression> {
+        let start_span = self.current_token.span();
+        
+        if !matches!(self.current_token, Token::LBrace(_)) {
+            return None;
+        }
+        self.next_token(); // Consume '{'
+        
+        let mut pairs = Vec::new();
+        
+        while !matches!(self.current_token, Token::RBrace(_)) && !matches!(self.current_token, Token::Eof(_)) {
+            // Parse key
+            let key = self.parse_simple_expression()?;
+            
+            // Expect colon
+            if !matches!(self.current_token, Token::Colon(_)) {
+                self.errors.push(ParseError {
+                    message: "Expected ':' in map literal".to_string(),
+                    span: self.current_token.span(),
+                });
+                return None;
+            }
+            self.next_token();
+            
+            // Parse value
+            let value = self.parse_simple_expression()?;
+            
+            pairs.push((key, value));
+            
+            // Skip comma if present
+            if matches!(self.current_token, Token::Comma(_)) {
+                self.next_token();
+            }
+        }
+        
+        // Consume '}'
+        if matches!(self.current_token, Token::RBrace(_)) {
+            self.next_token();
+        } else {
+            self.errors.push(ParseError {
+                message: "Expected '}' to close map literal".to_string(),
+                span: self.current_token.span(),
+            });
+        }
+        
+        Some(Expression::Literal(
+            Literal::Map(MapLiteral {
+                pairs,
+                span: start_span,
+            }),
+            start_span,
+        ))
+    }
+    
+    /// Minimal implementation of parse_prefix for basic expressions
+    fn parse_prefix(&mut self) -> Option<Expression> {
+        match &self.current_token {
+            Token::Number(num, span) => {
+                let expr = Expression::Literal(Literal::Number(num.clone()), *span);
+                self.next_token();
+                Some(expr)
+            }
+            Token::String(s, span) => {
+                let expr = Expression::Literal(Literal::String(s.clone()), *span);
+                self.next_token();
+                Some(expr)
+            }
+            Token::Identifier(ident, span) => {
+                let expr = Expression::Identifier(ident.clone(), *span);
+                self.next_token();
+                Some(expr)
+            }
+            Token::LBrace(_) => {
+                self.parse_map_literal()
+            }
+            _ => None
+        }
+    }
+    
+    /// Get precedence of the peek token
+    fn peek_precedence(&self) -> Precedence {
+        match &self.peek_token {
+            Token::Plus(_) | Token::Minus(_) => Precedence::Sum,
+            Token::Asterisk(_) | Token::Slash(_) => Precedence::Product,
+            Token::Equals(_) => Precedence::Equals,
+            _ => Precedence::Lowest
+        }
+    }
+    
+    /// Minimal implementation of parse_infix (stub for now)
+    fn parse_infix(&mut self, _left: Expression) -> Option<Expression> {
+        // For now, just return the left expression (no infix operations)
+        None
+    }
 }

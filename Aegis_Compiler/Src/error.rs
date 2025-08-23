@@ -71,6 +71,12 @@ pub enum SemanticErrorType {
     MissingField,
     /// Invalid UI component or property
     InvalidUIComponent,
+    /// Unknown field in contract initialization
+    UnknownField,
+    /// Invalid field key in contract initialization
+    InvalidFieldKey,
+    /// Undefined type
+    UndefinedType,
     /// Other semantic error
     Other,
 }

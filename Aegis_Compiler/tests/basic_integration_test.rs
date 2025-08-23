@@ -29,9 +29,9 @@ fn test_basic_parser_functionality() {
     
     let program = architect.parse_program();
     
-    // Should parse without errors (stub implementation returns empty program)
+    // Should parse without errors and now actually parse the let statement
     assert!(architect.errors.is_empty());
-    assert_eq!(program.definitions.len(), 0); // Stub implementation
+    assert_eq!(program.definitions.len(), 1); // Real implementation now parses let statements
 }
 
 #[test]
