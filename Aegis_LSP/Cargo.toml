@@ -20,7 +20,7 @@ tower-lsp = "0.20"
 tokio = { version = "1.0", features = ["full"] }
 
 # For thread-safe access to our document store.
-dashmap = "5.5"
+dashmap = "6.1"
 
 # For logging and diagnostics.
 tracing = "0.1"
