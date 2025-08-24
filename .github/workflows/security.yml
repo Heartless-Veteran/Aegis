@@ -56,12 +56,22 @@ jobs:
           key: ${{ runner.os }}-cargo-audit-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install cargo-audit
-        uses: jakejarvis/retry@v2
-        with:
-          timeout_minutes: 2
-          max_attempts: 3
-          command: cargo install cargo-audit
-
+        run: |
+          # Retry cargo-audit installation up to 3 times with 2 minute timeout per attempt
+          ATTEMPTS=0
+          MAX_ATTEMPTS=3
+          until [ $ATTEMPTS -ge $MAX_ATTEMPTS ]
+          do
+            ATTEMPTS=$((ATTEMPTS+1))
+            echo "Attempt $ATTEMPTS to install cargo-audit..."
+            timeout 120 cargo install cargo-audit && break
+            echo "Attempt $ATTEMPTS failed. Retrying in 10 seconds..."
+            sleep 10
+          done
+          if ! cargo audit --version > /dev/null 2>&1; then
+            echo "Failed to install cargo-audit after $MAX_ATTEMPTS attempts."
+            exit 1
+          fi
       - name: Run Cargo Audit
         run: |
           # Run audit with proper error handling
