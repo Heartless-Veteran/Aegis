@@ -32,10 +32,13 @@ jobs:
           echo "Building security audit for commit: $CURRENT_SHA"
           
           # Verify GPG signature if available
-          if git verify-commit HEAD 2>/dev/null; then
+          VERIFY_OUTPUT=$(git verify-commit HEAD 2>&1)
+          if [ $? -eq 0 ]; then
             echo "✅ Commit signature verified"
           else
             echo "⚠️  Commit not signed (non-blocking)"
+            echo "GPG verification details:"
+            echo "$VERIFY_OUTPUT"
           fi
 
       - name: Install Rust toolchain
