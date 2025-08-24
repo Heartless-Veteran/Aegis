@@ -9,9 +9,6 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "06:00"
-    labels:
-      - "dependencies"
-      - "github-actions"
     reviewers:
       - "HeartlessVeteran2"
     
@@ -22,9 +19,6 @@ updates:
       interval: "weekly"
       day: "monday"  
       time: "07:00"
-    labels:
-      - "dependencies"
-      - "rust"
     reviewers:
       - "HeartlessVeteran2"
     # Ignore indirect dependencies to reduce noise
@@ -39,9 +33,5 @@ updates:
       interval: "monthly"
       day: "monday"
       time: "08:00" 
-    labels:
-      - "dependencies"
-      - "docker"
-      - "devcontainer"
     reviewers:
       - "HeartlessVeteran2"
