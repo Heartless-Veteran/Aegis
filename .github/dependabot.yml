@@ -7,7 +7,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
+      day: "tuesday"
       time: "06:00"
     reviewers:
       - "HeartlessVeteran2"
@@ -17,7 +17,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"  
+      day: "wednesday"  
       time: "07:00"
     reviewers:
       - "HeartlessVeteran2"
@@ -31,7 +31,7 @@ updates:
     directory: "/.devcontainer"
     schedule:
       interval: "monthly"
-      day: "monday"
+      day: "thursday"
       time: "08:00" 
     reviewers:
       - "HeartlessVeteran2"
