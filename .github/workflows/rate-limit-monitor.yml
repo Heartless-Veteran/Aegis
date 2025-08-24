@@ -1,5 +1,8 @@
 name: Rate Limit Monitor
 
+permissions:
+  contents: read
+
 on:
   schedule:
     # Check rate limits daily
