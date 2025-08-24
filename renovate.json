@@ -2,5 +2,44 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
+  "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
+  "dependencyDashboardFooter": "- [x] Check this box to trigger a request for Renovate to run again on this repository",
+  "packageRules": [
+    {
+      "description": "Group all GitHub Actions updates",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group Rust dependencies",
+      "matchManagers": ["cargo"],
+      "groupName": "Rust dependencies",
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "DevContainer updates",
+      "matchManagers": ["devcontainer"],
+      "groupName": "DevContainer",
+      "automerge": false
+    }
+  ],
+  "labels": ["dependencies"],
+  "assigneesFromCodeOwners": true,
+  "reviewersFromCodeOwners": true,
+  "schedule": ["before 6am on monday"],
+  "timezone": "UTC",
+  "prCreation": "immediate",
+  "prHourlyLimit": 2,
+  "branchConcurrentLimit": 5,
+  "enabledManagers": [
+    "cargo",
+    "github-actions", 
+    "dockerfile",
+    "devcontainer"
   ]
 }
