@@ -1,8 +1,8 @@
 //! Aegis Programming Language Compiler
 
-pub mod token;
 pub mod ast;
 pub mod error;
+pub mod token;
 
 // Include the Scribe from mod.rs
 include!("mod.rs");
@@ -28,6 +28,6 @@ pub mod guardian {
 }
 
 // Re-export main types for convenience
-pub use guardian::Guardian;
-pub use token::{Token, Span};
 pub use ast::Expression;
+pub use guardian::Guardian;
+pub use token::{Span, Token};

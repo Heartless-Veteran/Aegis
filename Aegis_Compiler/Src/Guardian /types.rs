@@ -42,20 +42,20 @@ pub enum Type {
     /// A dynamic type from an external source, like the JavaScript Bridge,
     /// where the type is not known at compile time.
     Dynamic,
-    
+
     /// UPDATED: The internal representation of an enum now includes its variants and their types.
     Enum {
         name: String,
         /// The key is the variant name, the value is the list of associated types.
         variants: HashMap<String, Vec<Type>>,
     },
-    
+
     /// A function type with parameter types and return type.
     Function {
         params: Vec<Type>,
         return_type: Box<Type>,
     },
-    
+
     // NEW: A placeholder for a generic type parameter like `T`.
     Generic(String),
 }

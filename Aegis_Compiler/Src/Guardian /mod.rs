@@ -1,5 +1,5 @@
 //! This module contains the Guardian, the semantic analyzer for Aegis.
-//! The Guardian is updated to resolve the types in an enum definition and to 
+//! The Guardian is updated to resolve the types in an enum definition and to
 //! type-check the instantiation of enum variants with their associated data.
 
 use crate::ast::*;
@@ -16,7 +16,7 @@ pub struct Guardian {
     pub errors: Vec<SemanticError>,
     /// The symbol table for managing scopes and declared identifiers.
     symbol_table: SymbolTable,
-    // Note: Additional context fields like dependency_graph, is_in_async_context, 
+    // Note: Additional context fields like dependency_graph, is_in_async_context,
     // and current_return_type will be added when implementing those features.
 }
 
@@ -57,7 +57,7 @@ impl Guardian {
             Expression::Literal(Literal::String(_), _) => Type::String,
             Expression::Literal(Literal::Boolean(_), _) => Type::Boolean,
             Expression::Literal(Literal::Nothing, _) => Type::Nothing,
-            
+
             Expression::Identifier(name, _) => {
                 if let Some(symbol) = self.symbol_table.resolve(name) {
                     symbol.ty
@@ -75,14 +75,17 @@ impl Guardian {
                         if let Some(symbol) = self.symbol_table.resolve(ident_name) {
                             if let Type::Enum { name, variants } = &symbol.ty {
                                 // This is an enum. Now check if the variant exists.
-                                if let Some(expected_types) = variants.get(&member_access.property) {
+                                if let Some(expected_types) = variants.get(&member_access.property)
+                                {
                                     // It's a valid variant. Now check the arguments.
                                     if call_expr.arguments.len() != expected_types.len() {
                                         // Error: Incorrect number of arguments for variant.
                                         return Type::Error;
                                     }
                                     // Check that each argument's type matches the expected type.
-                                    for (arg, expected_ty) in call_expr.arguments.iter().zip(expected_types) {
+                                    for (arg, expected_ty) in
+                                        call_expr.arguments.iter().zip(expected_types)
+                                    {
                                         let arg_ty = self.infer_expression_type(arg);
                                         if &arg_ty != expected_ty {
                                             // Error: Mismatched argument type.
@@ -90,7 +93,10 @@ impl Guardian {
                                         }
                                     }
                                     // If all checks pass, the type is the enum itself.
-                                    return Type::Enum { name: name.clone(), variants: variants.clone() };
+                                    return Type::Enum {
+                                        name: name.clone(),
+                                        variants: variants.clone(),
+                                    };
                                 }
                             }
                         }
@@ -113,7 +119,10 @@ impl Guardian {
                                 if let Some(variant_types) = variants.get(&member_access.property) {
                                     if variant_types.is_empty() {
                                         // ...then this is a valid enum instantiation without data.
-                                        return Type::Enum { name: name.clone(), variants: variants.clone() };
+                                        return Type::Enum {
+                                            name: name.clone(),
+                                            variants: variants.clone(),
+                                        };
                                     }
                                 }
                             }
@@ -140,9 +149,16 @@ impl Guardian {
                             }
                         }
                         // NEW: Check enum variant patterns.
-                        WhenPattern::EnumVariant { enum_name, variant_name, .. } => {
+                        WhenPattern::EnumVariant {
+                            enum_name,
+                            variant_name,
+                            ..
+                        } => {
                             // Check that the pattern's enum type matches the subject's enum type.
-                            if let Type::Enum { name: subject_name, .. } = &subject_type {
+                            if let Type::Enum {
+                                name: subject_name, ..
+                            } = &subject_type
+                            {
                                 if subject_name != enum_name {
                                     // Error: Pattern is for a different enum type.
                                     return Type::Error;
@@ -191,7 +207,7 @@ impl Guardian {
                     Type::Error
                 }
             }
-            
+
             // ... cases for all other expression types ...
             _ => Type::Error,
         }
@@ -232,7 +248,8 @@ impl Guardian {
         let enum_kind = SymbolKind::Enum {
             variants: resolved_variants.keys().cloned().collect(),
         };
-        self.symbol_table.define(enum_def.name.clone(), enum_type, enum_kind);
+        self.symbol_table
+            .define(enum_def.name.clone(), enum_type, enum_kind);
     }
 
     /// Helper method to infer the type of a literal value.
@@ -278,14 +295,17 @@ impl Guardian {
                 fields: resolved_fields,
             }
         };
-        
+
         // The "type" here is a placeholder, as it can't be a concrete type until instantiated.
         let contract_type = Type::Custom(contract_def.name.clone());
-        
-        if !self.symbol_table.define(contract_def.name.clone(), contract_type, contract_kind) {
+
+        if !self
+            .symbol_table
+            .define(contract_def.name.clone(), contract_type, contract_kind)
+        {
             self.errors.push(SemanticError::new(
                 format!("Contract '{}' is already declared", contract_def.name),
-                contract_def.span.clone(),
+                contract_def.span,
                 SemanticErrorType::DuplicateDeclaration,
             ));
         }
@@ -295,30 +315,35 @@ impl Guardian {
     pub fn check_function_definition(&mut self, func: &FunctionDefinition) {
         // For now, just add the function to the symbol table
         // TODO: Implement full function body checking
-        let param_types: Vec<Type> = func.parameters.iter()
+        let param_types: Vec<Type> = func
+            .parameters
+            .iter()
             .map(|p| self.resolve_type_from_string(&p.type_annotation))
             .collect();
-            
+
         let return_type = if let Some(ret_type) = &func.return_type {
             Box::new(self.resolve_type_from_string(ret_type))
         } else {
             Box::new(Type::Nothing)
         };
-        
+
         let func_type = Type::Function {
             params: param_types.clone(),
             return_type: return_type.clone(),
         };
-        
+
         let func_kind = SymbolKind::Function {
             param_types,
             return_type,
         };
-        
-        if !self.symbol_table.define(func.name.clone(), func_type, func_kind) {
+
+        if !self
+            .symbol_table
+            .define(func.name.clone(), func_type, func_kind)
+        {
             self.errors.push(SemanticError::new(
                 format!("Function '{}' is already declared", func.name),
-                func.span.clone(),
+                func.span,
                 SemanticErrorType::DuplicateDeclaration,
             ));
         }
@@ -340,11 +365,14 @@ impl Guardian {
         // TODO: Check app body and show blocks
         let app_type = Type::Custom(format!("App<{}>", app.name));
         let app_kind = SymbolKind::Type;
-        
-        if !self.symbol_table.define(app.name.clone(), app_type, app_kind) {
+
+        if !self
+            .symbol_table
+            .define(app.name.clone(), app_type, app_kind)
+        {
             self.errors.push(SemanticError::new(
                 format!("App '{}' is already declared", app.name),
-                app.span.clone(),
+                app.span,
                 SemanticErrorType::DuplicateDeclaration,
             ));
         }
@@ -354,11 +382,11 @@ impl Guardian {
     pub fn check_let_statement(&mut self, let_stmt: &LetStatement) {
         // Infer the type of the value expression
         let value_type = self.infer_expression_type(&let_stmt.value);
-        
+
         // If there's a type annotation, validate it matches
         if let Some(expected_type_str) = &let_stmt.type_annotation {
             let expected_type = self.resolve_type_from_string(expected_type_str);
-            
+
             // Special handling for contract initializers (map literals)
             if let Expression::Literal(Literal::Map(map_literal), _) = &let_stmt.value {
                 if let Type::Custom(contract_name) = &expected_type {
@@ -368,41 +396,52 @@ impl Guardian {
                 // Regular type checking
                 if !self.types_are_compatible(&expected_type, &value_type) {
                     self.errors.push(SemanticError::new(
-                        format!("Type mismatch: expected {:?}, found {:?}", expected_type, value_type),
-                        let_stmt.span.clone(),
+                        format!(
+                            "Type mismatch: expected {:?}, found {:?}",
+                            expected_type, value_type
+                        ),
+                        let_stmt.span,
                         SemanticErrorType::TypeMismatch,
                     ));
                 }
             }
         }
-        
+
         // Register the variable
         let var_type = if let Some(type_annotation) = &let_stmt.type_annotation {
             self.resolve_type_from_string(type_annotation)
         } else {
             value_type
         };
-        
+
         let var_kind = SymbolKind::Variable {
             is_tracked: let_stmt.is_tracked,
         };
-        
-        if !self.symbol_table.define(let_stmt.name.clone(), var_type, var_kind) {
+
+        if !self
+            .symbol_table
+            .define(let_stmt.name.clone(), var_type, var_kind)
+        {
             self.errors.push(SemanticError::new(
                 format!("Variable '{}' is already declared", let_stmt.name),
-                let_stmt.span.clone(),
+                let_stmt.span,
                 SemanticErrorType::DuplicateDeclaration,
             ));
         }
     }
 
     /// Check contract initialization from map literal
-    pub fn check_contract_initialization(&mut self, contract_name: &str, map_literal: &MapLiteral, span: &Span) {
+    pub fn check_contract_initialization(
+        &mut self,
+        contract_name: &str,
+        map_literal: &MapLiteral,
+        span: &Span,
+    ) {
         // Look up the contract definition
         if let Some(contract_symbol) = self.symbol_table.resolve(contract_name) {
             if let SymbolKind::Contract { fields } = &contract_symbol.kind {
                 let mut found_fields = HashMap::new();
-                
+
                 // Check each field in the map literal
                 for (key_expr, value_expr) in &map_literal.pairs {
                     let field_name = match key_expr {
@@ -410,42 +449,51 @@ impl Guardian {
                         Expression::Identifier(name, _) => name.as_str(), // Allow identifiers for field names
                         _ => {
                             self.errors.push(SemanticError::new(
-                                "Contract field keys must be string literals or identifiers".to_string(),
-                                span.clone(),
+                                "Contract field keys must be string literals or identifiers"
+                                    .to_string(),
+                                *span,
                                 SemanticErrorType::InvalidFieldKey,
                             ));
                             continue;
                         }
                     };
-                        
+
                     if let Some(expected_type) = fields.get(field_name) {
                         let actual_type = self.infer_expression_type(value_expr);
-                        
+
                         if !self.types_are_compatible(expected_type, &actual_type) {
                             self.errors.push(SemanticError::new(
-                                format!("Type mismatch in field '{}': expected {:?}, found {:?}", 
-                                    field_name, expected_type, actual_type),
-                                span.clone(),
+                                format!(
+                                    "Type mismatch in field '{}': expected {:?}, found {:?}",
+                                    field_name, expected_type, actual_type
+                                ),
+                                *span,
                                 SemanticErrorType::TypeMismatch,
                             ));
                         }
-                        
+
                         found_fields.insert(field_name.to_string(), true);
                     } else {
                         self.errors.push(SemanticError::new(
-                            format!("Unknown field '{}' in contract '{}'", field_name, contract_name),
-                            span.clone(),
+                            format!(
+                                "Unknown field '{}' in contract '{}'",
+                                field_name, contract_name
+                            ),
+                            *span,
                             SemanticErrorType::UnknownField,
                         ));
                     }
                 }
-                
+
                 // Check for missing fields
-                for (field_name, _) in fields {
+                for field_name in fields.keys() {
                     if !found_fields.contains_key(field_name) {
                         self.errors.push(SemanticError::new(
-                            format!("Missing required field '{}' in contract '{}'", field_name, contract_name),
-                            span.clone(),
+                            format!(
+                                "Missing required field '{}' in contract '{}'",
+                                field_name, contract_name
+                            ),
+                            *span,
                             SemanticErrorType::MissingField,
                         ));
                     }
@@ -454,7 +502,7 @@ impl Guardian {
         } else {
             self.errors.push(SemanticError::new(
                 format!("Undefined contract type '{}'", contract_name),
-                span.clone(),
+                *span,
                 SemanticErrorType::UndefinedType,
             ));
         }
@@ -477,8 +525,9 @@ impl Guardian {
             }
         }
     }
-    
+
     /// NEW: Helper function to resolve a `TypeIdentifier` AST node into a `Type`.
+    #[allow(clippy::only_used_in_recursion)]
     fn resolve_type_identifier(&mut self, type_ann: &TypeIdentifier, scope: &SymbolTable) -> Type {
         match type_ann {
             TypeIdentifier::Simple { name, .. } => {
@@ -492,10 +541,10 @@ impl Guardian {
                             "string" => Type::String,
                             "boolean" => Type::Boolean,
                             "nothing" => Type::Nothing,
-                            _ => Type::Custom(name.clone())
+                            _ => Type::Custom(name.clone()),
                         }
                     },
-                    |s| s.ty.clone()
+                    |s| s.ty.clone(),
                 )
             }
             TypeIdentifier::Generic { name, args, .. } => {

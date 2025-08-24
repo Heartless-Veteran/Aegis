@@ -5,13 +5,15 @@
 //! collecting any syntax errors it finds along the way.
 
 use crate::ast::*;
-use crate::token::{Token, Span};
 use crate::error::ParseError;
+use crate::token::{Span, Token};
 use crate::Scribe;
 
 /// Defines the precedence levels for operators to manage order of operations.
 /// Higher variants have higher precedence.
+/// Note: Currently unused but reserved for future expression parsing implementation.
 #[derive(PartialEq, PartialOrd)]
+#[allow(dead_code)]
 enum Precedence {
     Lowest,
     Assign,      // =
@@ -50,7 +52,7 @@ impl<'a> Architect<'a> {
         architect.next_token();
         architect
     }
-    
+
     /// Consumes the current token and advances the Scribe to the next one.
     fn next_token(&mut self) {
         self.current_token = self.peek_token.clone();
@@ -73,7 +75,7 @@ impl<'a> Architect<'a> {
         }
         program
     }
-    
+
     /// Dispatches to the correct parsing function for a top-level definition,
     /// such as an `app`, `contract`, or function.
     fn parse_definition(&mut self) -> Option<Definition> {
@@ -90,6 +92,8 @@ impl<'a> Architect<'a> {
 
     /// The core of the Pratt parser for handling expressions.
     /// It recursively parses tokens based on their defined precedence.
+    /// Note: Reserved for future complete expression parsing implementation.
+    #[allow(dead_code)]
     fn parse_expression(&mut self, precedence: Precedence) -> Option<Expression> {
         // Find a prefix parsing function for the current token.
         // This handles literals, identifiers, and prefix operators like `-` or `!`.
@@ -97,7 +101,7 @@ impl<'a> Architect<'a> {
             Some(expr) => expr,
             None => {
                 // Register an error if no prefix parse function is found.
-                self.errors.push(ParseError { 
+                self.errors.push(ParseError {
                     message: format!("Unexpected token: {:?}", self.current_token),
                     span: self.current_token.span(),
                 });
@@ -108,16 +112,16 @@ impl<'a> Architect<'a> {
         // Loop as long as the next token is an infix operator with higher precedence.
         while precedence < self.peek_precedence() {
             self.next_token(); // Consume the operator
-            // Find an infix parsing function for the new current token.
+                               // Find an infix parsing function for the new current token.
             left_expression = match self.parse_infix(left_expression.clone()) {
                 Some(expr) => expr,
                 None => return Some(left_expression), // No infix function found, end of expression.
             };
         }
-        
+
         Some(left_expression)
     }
-    
+
     // In a complete implementation, this file would continue with dozens of helper
     // functions, each responsible for parsing a specific piece of the language's
     // grammar. For example:
@@ -135,17 +139,17 @@ impl<'a> Architect<'a> {
     // fn parse_call_expression(&mut self, function: Expression) -> Option<Expression> { ... }
     //
     // ...and so on for every language construct.
-    
+
     /// Parse a contract definition
     fn parse_contract_definition(&mut self) -> Option<ContractDefinition> {
         let start_span = self.current_token.span();
-        
+
         // Consume 'contract' token
         if !matches!(self.current_token, Token::Contract(_)) {
             return None;
         }
         self.next_token();
-        
+
         // Get contract name
         let name = if let Token::Identifier(name, _) = &self.current_token {
             let contract_name = name.clone();
@@ -158,21 +162,21 @@ impl<'a> Architect<'a> {
             });
             return None;
         };
-        
+
         // Parse generic parameters if present: <T>, <T, U>, etc.
         let mut generic_params = Vec::new();
         if matches!(self.current_token, Token::LessThan(_)) {
             self.next_token(); // consume '<'
-            
+
             // Parse first parameter
             if let Token::Identifier(param_name, _) = &self.current_token {
                 generic_params.push(param_name.clone());
                 self.next_token();
-                
+
                 // Parse additional parameters separated by commas
                 while matches!(self.current_token, Token::Comma(_)) {
                     self.next_token(); // consume ','
-                    
+
                     if let Token::Identifier(param_name, _) = &self.current_token {
                         generic_params.push(param_name.clone());
                         self.next_token();
@@ -184,7 +188,7 @@ impl<'a> Architect<'a> {
                         return None;
                     }
                 }
-                
+
                 // Expect closing '>'
                 if !matches!(self.current_token, Token::GreaterThan(_)) {
                     self.errors.push(ParseError {
@@ -202,7 +206,7 @@ impl<'a> Architect<'a> {
                 return None;
             }
         }
-        
+
         // Expect colon
         if !matches!(self.current_token, Token::Colon(_)) {
             self.errors.push(ParseError {
@@ -212,26 +216,26 @@ impl<'a> Architect<'a> {
             return None;
         }
         self.next_token();
-        
+
         // Parse fields (simplified - just parse lines with "name: type" format)
         let mut fields = Vec::new();
-        while !matches!(self.current_token, Token::Eof(_)) && 
-              !matches!(self.current_token, Token::Let(_)) &&
-              !matches!(self.current_token, Token::Contract(_)) &&
-              !matches!(self.current_token, Token::App(_)) {
-            
+        while !matches!(self.current_token, Token::Eof(_))
+            && !matches!(self.current_token, Token::Let(_))
+            && !matches!(self.current_token, Token::Contract(_))
+            && !matches!(self.current_token, Token::App(_))
+        {
             if let Token::Identifier(field_name, field_span) = &self.current_token {
                 let field_name = field_name.clone();
                 let field_start_span = *field_span;
                 self.next_token();
-                
+
                 if matches!(self.current_token, Token::Colon(_)) {
                     self.next_token();
-                    
+
                     if let Token::Identifier(type_name, _) = &self.current_token {
                         let type_name = type_name.clone();
                         self.next_token();
-                        
+
                         fields.push(ContractField {
                             name: field_name,
                             type_ann: TypeIdentifier::Simple {
@@ -255,7 +259,7 @@ impl<'a> Architect<'a> {
                 self.next_token();
             }
         }
-        
+
         Some(ContractDefinition {
             name,
             generic_params,
@@ -263,17 +267,17 @@ impl<'a> Architect<'a> {
             span: start_span,
         })
     }
-    
+
     /// Parse a let statement
     fn parse_let_statement(&mut self) -> Option<Statement> {
         let start_span = self.current_token.span();
-        
-        // Consume 'let' token  
+
+        // Consume 'let' token
         if !matches!(self.current_token, Token::Let(_)) {
             return None;
         }
         self.next_token();
-        
+
         // Check for 's' (for "let's")
         let mut is_tracked = false;
         if let Token::Identifier(ident, _) = &self.current_token {
@@ -282,13 +286,13 @@ impl<'a> Architect<'a> {
                 is_tracked = false; // Regular variable
             }
         }
-        
+
         // Check for 'track' keyword
         if let Token::Track(_) = &self.current_token {
             is_tracked = true;
             self.next_token();
         }
-        
+
         // Get variable name
         let name = if let Token::Identifier(name, _) = &self.current_token {
             let var_name = name.clone();
@@ -301,18 +305,18 @@ impl<'a> Architect<'a> {
             });
             return None;
         };
-        
+
         // Check for type annotation
         let mut type_annotation = None;
         if matches!(self.current_token, Token::Colon(_)) {
             self.next_token();
-            
+
             if let Token::Identifier(type_name, _) = &self.current_token {
                 type_annotation = Some(type_name.clone());
                 self.next_token();
             }
         }
-        
+
         // Expect assignment
         if !matches!(self.current_token, Token::Assign(_)) {
             self.errors.push(ParseError {
@@ -322,10 +326,10 @@ impl<'a> Architect<'a> {
             return None;
         }
         self.next_token();
-        
+
         // Parse value expression (simplified)
         let value = self.parse_simple_expression()?;
-        
+
         Some(Statement::Let(LetStatement {
             name,
             is_tracked,
@@ -334,7 +338,7 @@ impl<'a> Architect<'a> {
             span: start_span,
         }))
     }
-    
+
     /// Parse a simple expression (number, string, identifier, or map literal)
     fn parse_simple_expression(&mut self) -> Option<Expression> {
         match &self.current_token {
@@ -366,22 +370,24 @@ impl<'a> Architect<'a> {
             }
         }
     }
-    
+
     /// Parse a map literal: { key: value, key: value }
     fn parse_map_literal(&mut self) -> Option<Expression> {
         let start_span = self.current_token.span();
-        
+
         if !matches!(self.current_token, Token::LBrace(_)) {
             return None;
         }
         self.next_token(); // Consume '{'
-        
+
         let mut pairs = Vec::new();
-        
-        while !matches!(self.current_token, Token::RBrace(_)) && !matches!(self.current_token, Token::Eof(_)) {
+
+        while !matches!(self.current_token, Token::RBrace(_))
+            && !matches!(self.current_token, Token::Eof(_))
+        {
             // Parse key
             let key = self.parse_simple_expression()?;
-            
+
             // Expect colon
             if !matches!(self.current_token, Token::Colon(_)) {
                 self.errors.push(ParseError {
@@ -391,18 +397,18 @@ impl<'a> Architect<'a> {
                 return None;
             }
             self.next_token();
-            
+
             // Parse value
             let value = self.parse_simple_expression()?;
-            
+
             pairs.push((key, value));
-            
+
             // Skip comma if present
             if matches!(self.current_token, Token::Comma(_)) {
                 self.next_token();
             }
         }
-        
+
         // Consume '}'
         if matches!(self.current_token, Token::RBrace(_)) {
             self.next_token();
@@ -412,7 +418,7 @@ impl<'a> Architect<'a> {
                 span: self.current_token.span(),
             });
         }
-        
+
         Some(Expression::Literal(
             Literal::Map(MapLiteral {
                 pairs,
@@ -421,8 +427,9 @@ impl<'a> Architect<'a> {
             start_span,
         ))
     }
-    
+
     /// Minimal implementation of parse_prefix for basic expressions
+    #[allow(dead_code)]
     fn parse_prefix(&mut self) -> Option<Expression> {
         match &self.current_token {
             Token::Number(num, span) => {
@@ -440,24 +447,24 @@ impl<'a> Architect<'a> {
                 self.next_token();
                 Some(expr)
             }
-            Token::LBrace(_) => {
-                self.parse_map_literal()
-            }
-            _ => None
+            Token::LBrace(_) => self.parse_map_literal(),
+            _ => None,
         }
     }
-    
+
     /// Get precedence of the peek token
+    #[allow(dead_code)]
     fn peek_precedence(&self) -> Precedence {
         match &self.peek_token {
             Token::Plus(_) | Token::Minus(_) => Precedence::Sum,
             Token::Asterisk(_) | Token::Slash(_) => Precedence::Product,
             Token::Equals(_) => Precedence::Equals,
-            _ => Precedence::Lowest
+            _ => Precedence::Lowest,
         }
     }
-    
+
     /// Minimal implementation of parse_infix (stub for now)
+    #[allow(dead_code)]
     fn parse_infix(&mut self, _left: Expression) -> Option<Expression> {
         // For now, just return the left expression (no infix operations)
         None

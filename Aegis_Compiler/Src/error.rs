@@ -18,8 +18,11 @@ impl ParseError {
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Parse error at {}..{}: {}", 
-            self.span.start, self.span.end, self.message)
+        write!(
+            f,
+            "Parse error at {}..{}: {}",
+            self.span.start, self.span.end, self.message
+        )
     }
 }
 
@@ -35,14 +38,21 @@ pub struct SemanticError {
 
 impl SemanticError {
     pub fn new(message: String, span: Span, error_type: SemanticErrorType) -> Self {
-        Self { message, span, error_type }
+        Self {
+            message,
+            span,
+            error_type,
+        }
     }
 }
 
 impl fmt::Display for SemanticError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Semantic error at {}..{}: {}", 
-            self.span.start, self.span.end, self.message)
+        write!(
+            f,
+            "Semantic error at {}..{}: {}",
+            self.span.start, self.span.end, self.message
+        )
     }
 }
 
@@ -97,8 +107,11 @@ impl CodeGenError {
 impl fmt::Display for CodeGenError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(span) = self.span {
-            write!(f, "Code generation error at {}..{}: {}", 
-                span.start, span.end, self.message)
+            write!(
+                f,
+                "Code generation error at {}..{}: {}",
+                span.start, span.end, self.message
+            )
         } else {
             write!(f, "Code generation error: {}", self.message)
         }

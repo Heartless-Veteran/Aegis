@@ -1,5 +1,5 @@
 //! Aegis Compiler Test Suite
-//! 
+//!
 //! This is a comprehensive test suite for the Aegis compiler that evaluates
 //! the performance and correctness of all compiler components.
 

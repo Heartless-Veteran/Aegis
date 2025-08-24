@@ -187,7 +187,7 @@ For full functionality, configure these secrets:
 ### Getting Help:
 - Check workflow logs in Actions tab
 - Review component-specific test results
-- Consult DEVELOPMENT.md for local development
+- Consult Contributing.md for local development setup
 - Review workflow documentation for external tool integration
 
 ---
