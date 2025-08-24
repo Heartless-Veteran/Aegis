@@ -1,0 +1,47 @@
+# Dependabot configuration for GitHub-native dependency updates
+# This works alongside Renovate to provide redundant dependency tracking
+version: 2
+updates:
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    reviewers:
+      - "HeartlessVeteran2"
+    
+  # Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"  
+      time: "07:00"
+    labels:
+      - "dependencies"
+      - "rust"
+    reviewers:
+      - "HeartlessVeteran2"
+    # Ignore indirect dependencies to reduce noise
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "08:00" 
+    labels:
+      - "dependencies"
+      - "docker"
+      - "devcontainer"
+    reviewers:
+      - "HeartlessVeteran2"
