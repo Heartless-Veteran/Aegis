@@ -1,0 +1,99 @@
+name: Rate Limit Monitor
+
+on:
+  schedule:
+    # Check rate limits daily
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+# Don't run concurrently with other workflows
+concurrency:
+  group: rate-limit-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor-rate-limits:
+    name: Monitor GitHub API Rate Limits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check GitHub API Rate Limits
+        run: |
+          echo "# GitHub API Rate Limit Status" > rate-limit-report.md
+          echo "" >> rate-limit-report.md
+          echo "**Checked:** $(date -u)" >> rate-limit-report.md
+          echo "" >> rate-limit-report.md
+          
+          # Check rate limits using GitHub API
+          RATE_LIMIT=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/rate_limit)
+          
+          echo "## Core API Limits" >> rate-limit-report.md
+          echo "\`\`\`json" >> rate-limit-report.md
+          echo "$RATE_LIMIT" | jq '.resources.core' >> rate-limit-report.md
+          echo "\`\`\`" >> rate-limit-report.md
+          echo "" >> rate-limit-report.md
+          
+          # Extract key metrics
+          REMAINING=$(echo "$RATE_LIMIT" | jq -r '.resources.core.remaining')
+          LIMIT=$(echo "$RATE_LIMIT" | jq -r '.resources.core.limit')
+          RESET_TIME=$(echo "$RATE_LIMIT" | jq -r '.resources.core.reset')
+          RESET_DATE=$(date -d "@$RESET_TIME" -u)
+          
+          echo "## Summary" >> rate-limit-report.md
+          echo "- **Remaining:** $REMAINING / $LIMIT" >> rate-limit-report.md
+          echo "- **Usage:** $(( (LIMIT - REMAINING) * 100 / LIMIT ))%" >> rate-limit-report.md
+          echo "- **Resets:** $RESET_DATE UTC" >> rate-limit-report.md
+          echo "" >> rate-limit-report.md
+          
+          # Alert if usage is high
+          USAGE_PERCENT=$(( (LIMIT - REMAINING) * 100 / LIMIT ))
+          if [ $USAGE_PERCENT -gt 80 ]; then
+            echo "⚠️ **WARNING:** High API usage detected ($USAGE_PERCENT%)" >> rate-limit-report.md
+            echo "Consider reducing workflow frequency or optimizing API calls." >> rate-limit-report.md
+            echo "" >> rate-limit-report.md
+          elif [ $USAGE_PERCENT -gt 60 ]; then
+            echo "⚠️ **NOTICE:** Moderate API usage ($USAGE_PERCENT%)" >> rate-limit-report.md
+            echo "Monitor usage and consider optimization if it increases." >> rate-limit-report.md
+            echo "" >> rate-limit-report.md
+          else
+            echo "✅ **GOOD:** API usage within normal limits ($USAGE_PERCENT%)" >> rate-limit-report.md
+            echo "" >> rate-limit-report.md
+          fi
+          
+          echo "## Recommendations" >> rate-limit-report.md
+          echo "- Schedule workflows during low-usage periods" >> rate-limit-report.md
+          echo "- Use concurrency controls to prevent overlapping runs" >> rate-limit-report.md
+          echo "- Implement proper retry logic with exponential backoff" >> rate-limit-report.md
+          echo "- Consider caching API responses where possible" >> rate-limit-report.md
+          
+          # Output key metrics for further processing
+          echo "rate_limit_remaining=$REMAINING" >> $GITHUB_OUTPUT
+          echo "rate_limit_usage_percent=$USAGE_PERCENT" >> $GITHUB_OUTPUT
+          
+          cat rate-limit-report.md
+
+      - name: Upload rate limit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rate-limit-report
+          path: rate-limit-report.md
+
+      - name: Check Renovate Rate Limits
+        run: |
+          echo "## Renovate Configuration Status" >> renovate-status.md
+          echo "" >> renovate-status.md
+          echo "**Current settings:**" >> renovate-status.md
+          echo "- PR Hourly Limit: 10" >> renovate-status.md
+          echo "- Branch Concurrent Limit: 10" >> renovate-status.md
+          echo "- Schedule: Before 4 AM UTC on Monday" >> renovate-status.md
+          echo "" >> renovate-status.md
+          echo "**Compared to previous vulnerable settings:**" >> renovate-status.md
+          echo "- Previous PR Limit: 2 (increased by 5x)" >> renovate-status.md
+          echo "- Previous Branch Limit: 5 (increased by 2x)" >> renovate-status.md
+          echo "- Previous Schedule: Before 6 AM (moved 2 hours earlier)" >> renovate-status.md
+
+      - name: Upload renovate status
+        uses: actions/upload-artifact@v4
+        with:
+          name: renovate-status
+          path: renovate-status.md

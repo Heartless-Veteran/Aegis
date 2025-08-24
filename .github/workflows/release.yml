@@ -33,6 +33,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify commit SHA
+        id: verify_sha
+        run: |
+          # Verify we're building from the expected commit
+          CURRENT_SHA=$(git rev-parse HEAD)
+          EXPECTED_SHA="${{ github.sha }}"
+          
+          echo "Current commit SHA: $CURRENT_SHA"
+          echo "Expected commit SHA: $EXPECTED_SHA"
+          
+          if [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
+            echo "ERROR: Commit SHA mismatch! This could indicate a security issue."
+            exit 1
+          fi
+          
+          # Store SHA for artifact verification
+          echo "VERIFIED_SHA=$CURRENT_SHA" >> $GITHUB_OUTPUT
+          echo "Build verified for commit: $CURRENT_SHA"
+
       - name: Generate changelog
         id: changelog
         run: |
