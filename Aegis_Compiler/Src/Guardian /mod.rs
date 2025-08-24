@@ -546,8 +546,10 @@ impl Guardian {
                         if let Some(generic_field_type) = fields.get(field_name) {
                             // 3. Substitute the generic type with the concrete type from our map.
                             let concrete_field_type = match generic_field_type {
-                                    .unwrap_or(Type::Error), // Or error if not found
-                                _ => generic_field_type, // It was already a concrete type
+                                Type::GenericParam(param_name) => {
+                                    type_map.get(param_name).cloned().unwrap_or(Type::Error)
+                                },
+                                _ => generic_field_type,
                             };
 
                             // 4. Infer the type of the value provided and check if it matches.
