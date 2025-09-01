@@ -99,3 +99,36 @@ let's user: User = {
         "Expected errors for extra field"
     );
 }
+
+#[test]
+fn test_nested_contract_initialization_wrong_type() {
+    let input = r#"
+contract Profile:
+    level: number
+    status: string
+
+contract User:
+    id: number
+    profile: Profile
+
+let's user: User = {
+    id: 1,
+    profile: {
+        level: "high", # This should be a number, not a string
+        status: "active"
+    }
+}"#;
+    let scribe = Scribe::new(input);
+    let mut architect = Architect::new(scribe);
+    let program = architect.parse_program();
+
+    let mut guardian = Guardian::new();
+    guardian.check_program(&program);
+
+    // This should fail because the nested contract has a field with the wrong type.
+    // The current implementation will not catch this, so this test will fail.
+    assert!(
+        !guardian.errors.is_empty(),
+        "Expected errors for wrong field type in nested contract"
+    );
+}

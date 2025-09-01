@@ -459,17 +459,36 @@ impl Guardian {
                     };
 
                     if let Some(expected_type) = fields.get(field_name) {
-                        let actual_type = self.infer_expression_type(value_expr);
-
-                        if !self.types_are_compatible(expected_type, &actual_type) {
-                            self.errors.push(SemanticError::new(
-                                format!(
-                                    "Type mismatch in field '{}': expected {:?}, found {:?}",
-                                    field_name, expected_type, actual_type
-                                ),
-                                *span,
-                                SemanticErrorType::TypeMismatch,
-                            ));
+                        // Check for nested contract initialization
+                        if let Type::Custom(nested_contract_name) = expected_type {
+                            if let Expression::Literal(Literal::Map(nested_map_literal), nested_span) = value_expr {
+                                // Recursive call for nested contract
+                                self.check_contract_initialization(nested_contract_name, nested_map_literal, nested_span);
+                            } else {
+                                // Expected a contract initializer but got something else
+                                let actual_type = self.infer_expression_type(value_expr);
+                                self.errors.push(SemanticError::new(
+                                    format!(
+                                        "Type mismatch in field '{}': expected contract '{}', but found {:?}",
+                                        field_name, nested_contract_name, actual_type
+                                    ),
+                                    *span,
+                                    SemanticErrorType::TypeMismatch,
+                                ));
+                            }
+                        } else {
+                            // Standard type check for primitive fields
+                            let actual_type = self.infer_expression_type(value_expr);
+                            if !self.types_are_compatible(expected_type, &actual_type) {
+                                self.errors.push(SemanticError::new(
+                                    format!(
+                                        "Type mismatch in field '{}': expected {:?}, found {:?}",
+                                        field_name, expected_type, actual_type
+                                    ),
+                                    *span,
+                                    SemanticErrorType::TypeMismatch,
+                                ));
+                            }
                         }
 
                         found_fields.insert(field_name.to_string(), true);
