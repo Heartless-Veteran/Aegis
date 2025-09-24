@@ -18,7 +18,7 @@ path = "Src/lib.rs"
 jni = "0.21"
 
 # For embedding the V8 JavaScript engine.
-deno_core = "0.355.0"
+deno_core = "0.362.0"
 
 # An asynchronous runtime required by deno_core.
 tokio = { version = "1", features = ["full"] }
