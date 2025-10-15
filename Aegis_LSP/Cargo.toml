@@ -17,7 +17,7 @@ aegis-compiler = { path = "../Aegis_Compiler" }
 tower-lsp = "0.20"
 
 # The asynchronous runtime required by tower-lsp.
-tokio = { version = "1.0", features = ["full"] }
+tokio = { version = "1.48", features = ["full"] }
 
 # For thread-safe access to our document store.
 dashmap = "6.1"
