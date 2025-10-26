@@ -1,11 +1,11 @@
 {
   "name": "Aegis Development Environment",
-  "image": "mcr.microsoft.com/devcontainers/rust:1-1-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/rust:2-1-bullseye",
   
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
+      "version": "22"
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
