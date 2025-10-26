@@ -335,7 +335,7 @@ jobs:
           chmod +x install.sh
 
       - name: Upload installation script
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: installation-script
           path: |
