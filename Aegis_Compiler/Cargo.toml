@@ -17,7 +17,7 @@ path = "Src/lib.rs"
 [dev-dependencies]
 # Test dependencies
 criterion = "0.7"  # For benchmarking
-proptest = "1.8.0"   # For property-based testing
+proptest = "1.9.0"   # For property-based testing
 
 [features]
 default = []
