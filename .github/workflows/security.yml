@@ -90,7 +90,7 @@ jobs:
           fi
 
       - name: Upload audit results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: security-audit-results
           path: audit-results.json
@@ -152,7 +152,7 @@ jobs:
           fi
 
       - name: Upload license report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: license-report
           path: |
@@ -261,7 +261,7 @@ jobs:
           cargo outdated --root-deps-only >> dependency-updates.md || echo "No outdated dependencies found" >> dependency-updates.md
 
       - name: Upload dependency report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dependency-update-report
           path: dependency-updates.md
@@ -311,7 +311,7 @@ jobs:
           echo "- Review license compatibility" >> security-summary.md
 
       - name: Upload security summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: security-summary
           path: security-summary.md
