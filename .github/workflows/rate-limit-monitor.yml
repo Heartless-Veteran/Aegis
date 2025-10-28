@@ -76,7 +76,7 @@ jobs:
           cat rate-limit-report.md
 
       - name: Upload rate limit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rate-limit-report
           path: rate-limit-report.md
@@ -96,7 +96,7 @@ jobs:
           echo "- Previous Schedule: Before 6 AM (moved 2 hours earlier)" >> renovate-status.md
 
       - name: Upload renovate status
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: renovate-status
           path: renovate-status.md
